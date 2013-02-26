@@ -1,0 +1,7 @@
+﻿<li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Language<b class="caret"></b></a>
+    <ul class="dropdown-menu">
+        <li>@Html.ActionLink("English", ViewContext.RouteData.Values["action"].ToString(),new {language = "en"})</li>
+        <li>@Html.ActionLink("Czech", ViewContext.RouteData.Values["action"].ToString(),new {language = "cs"})</li>
+    </ul>
+</li>    

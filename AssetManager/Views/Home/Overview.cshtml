@@ -1,0 +1,67 @@
+﻿@using BasicResources = AssetManager.Resources.BasicResources
+<div class="page-header">
+    <h1>@BasicResources.Overview</h1>
+</div>
+<div class="span6">
+    <form class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Name</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.Name" data-bind="value:name">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Address</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.Address" data-bind="value: address">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.City</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.City" data-bind="value: city">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Country</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.Country" data-bind="value: country">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.ZipCode</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.ZipCode" data-bind="value: zipCode">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Price</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.Price" data-bind="value: price">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Size</strong></label>
+            <div class="controls">
+                <input type="text" placeholder="@BasicResources.Size" data-bind="value: size">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.PMS</strong></label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="text" placeholder="@BasicResources.PMS" data-bind="value: pms">
+                    <button type="button" class="btn" data-bind="click:computePMS"><i class="icon-refresh"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="btn-group pull-right">
+            <button type="submit" class="btn btn-success" data-bind="enable: !isBusy() && canSave(),click: save,text:saveText"></button>
+        </div>
+    </form>
+</div>

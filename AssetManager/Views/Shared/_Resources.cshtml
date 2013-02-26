@@ -1,0 +1,29 @@
+﻿@using BasicResources=AssetManager.Resources.BasicResources
+@using Months=AssetManager.Resources.Months
+
+<script type="text/javascript">
+    if (!window.resourceProvider) { 
+        window.resourceProvider = { 
+            update: '@BasicResources.Update',
+            create: '@BasicResources.Create',
+            cancel: '@BasicResources.Cancel',
+            save: '@BasicResources.Save',
+            saving: '@BasicResources.Saving',
+
+            months: {
+                1: '@Months.January',
+                2: '@Months.February',
+                3: '@Months.Mars',
+                4: '@Months.April',
+                5: '@Months.May',
+                6: '@Months.June',
+                7: '@Months.July',
+                8: '@Months.August',
+                9: '@Months.Septembre',
+                10: '@Months.Octobre',
+                11: '@Months.Novembre',
+                12: '@Months.Decembre'
+            }
+        }; 
+    }
+</script>

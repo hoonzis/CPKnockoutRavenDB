@@ -1,0 +1,118 @@
+﻿@using BasicResources = AssetManager.Resources.BasicResources
+<script type="text/javascript">
+    var requestedAsset;
+    var requestedTab;
+    var map;
+    var owner = new OwnerViewModel();
+    var tabs = [];
+    var $currentTab;
+
+    owner.detailsRendered = function (elements) {
+        $.each(tabs, function (i, v) {
+            $(v).hide();
+        });
+
+        $currentTab = $("#overview");
+        $currentTab.show();
+    };
+
+    function initURLs() {
+        Path.map("#/:asset/:tab").to(function () {
+            requestedAsset = this.params["asset"];
+            requestedTab = this.params["tab"];
+            showTab(this.params["asset"], this.params["tab"]);
+        });
+        Path.root("#/");
+
+        Path.listen();
+        tabs.push('#rents');
+        tabs.push('#charges');
+        tabs.push('#overview');
+
+    }
+
+    function showTab(as, id) {
+        if (owner.assets() == null || owner.assets().length == 0)
+            return;
+
+        if (owner.selectedAsset() == null || owner.selectedAsset().name() != as) {
+            var sAsset;
+            for (var i = 0; i < owner.assets().length; i++) {
+                if (owner.assets()[i].name() == as) {
+                    owner.assets()[i].select();
+                    break;
+                }
+            }
+        }
+
+        if (!owner.selectedAsset())
+            return;
+
+        if ($currentTab != null) {
+            $currentTab.hide();
+        }
+        $currentTab = $('#' + id);
+        $currentTab.show();
+
+        if (id = "charges")
+            showChargesGraph(owner.selectedAsset());
+        if (id = "rents")
+            showRentsGraph(owner.selectedAsset());
+    }
+
+    $(document).ready(function () {
+        initURLs();
+        ko.validation.configure({
+            registerExtenders: true,
+            messagesOnModified: true,
+            insertMessages: false,
+            decorateElement: true,
+            parseInputAttributes: true,
+            messageTemplate: null,
+            grouping: { observable: true }
+        });
+
+        ko.applyBindings(owner);
+    });
+
+</script>
+
+<div class="row-fluid">
+    <div class="span2">
+        <div class="well sidebar-nav">
+            <li class="nav-header">Property list:</li>
+            <ul class="nav nav-list" data-bind="foreach:assets">
+                <li><a data-bind="text:name,click:select" href="#"></a></li>
+            </ul>
+            <ul class="nav nav-list">
+                <li class="nav-header">Actions:</li>
+                <li><a href="#" data-bind="click: newAsset"><i class="icon-pencil"></i>@BasicResources.NewProperty</a></li>
+            </ul>
+        </div>
+
+        <div data-bind="visible: selectedAsset()!=null">
+            <div class="well sidebar-nav" data-bind="with:selectedAsset">
+                <ul class="nav nav-list">
+                    <li class="nav-header" data-bind="text:name"></li>
+                    <li><a data-bind="attr: {href: '#/' + name() + '/overview'}"><i class="icon-pencil"></i>@BasicResources.Overview</a></li>
+                    <li><a data-bind="attr: {href: '#/' + name() + '/charges'}"><i class="icon-arrow-down"></i>@BasicResources.Charges</a></li>
+                    <li><a data-bind="attr: {href: '#/' + name() + '/rents'}"><i class="icon-arrow-up"></i>@BasicResources.Rents</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}">
+        <div class="span10">
+            <div id="overview">
+                @Html.Partial("Overview")
+            </div>
+            <div id="charges">
+                @Html.Partial("Charges")
+            </div>
+            <div id="rents">
+                @Html.Partial("Rents")
+            </div>
+        </div>
+    </div>
+</div>

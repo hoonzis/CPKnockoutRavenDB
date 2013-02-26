@@ -1,0 +1,231 @@
+﻿<html>
+  <head>
+    <title>Quickstart</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <script type="text/javascript">
+        var CLIENT_ID = '752004182866-ea3qupvn9t9j6h18ge1iebqqt73pfm7o.apps.googleusercontent.com';
+        var SCOPES = 'https://www.googleapis.com/auth/drive';
+
+        /**
+         * Called when the client library is loaded to start the auth flow.
+         */
+        function handleClientLoad() {
+            window.setTimeout(checkAuth, 1);
+        }
+
+        /**
+         * Check if the current user has authorized the application.
+         */
+        function checkAuth() {
+            gapi.auth.authorize(
+                {'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': true},
+                handleAuthResult);
+        }
+
+        /**
+         * Called when authorization server replies.
+         *
+         * @param {Object} authResult Authorization result.
+         */
+        function handleAuthResult(authResult) {
+            var authButton = document.getElementById('authorizeButton');
+            var filePicker = document.getElementById('filePicker');
+            authButton.style.display = 'none';
+            filePicker.style.display = 'none';
+            if (authResult && !authResult.error) {
+                // Access token has been successfully retrieved, requests can be sent to the API.
+                filePicker.style.display = 'block';
+                filePicker.onchange = uploadFile;
+            } else {
+                // No access token could be retrieved, show the button to start the authorization flow.
+                authButton.style.display = 'block';
+                authButton.onclick = function() {
+                    gapi.auth.authorize(
+                        {'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': false},
+                        handleAuthResult);
+                };
+            }
+        }
+
+        /**
+         * Start the file upload.
+         *
+         * @param {Object} evt Arguments from the file selector.
+         */
+        function uploadFile(evt) {
+            gapi.client.load('drive', 'v2', function() {
+                var file = evt.target.files[0];
+                insertSimpleFile(file,printout);
+            });
+        }
+
+        function insertFile(fileData, callback) {
+            var boundary = '-------314159265358979323846';
+            var delimiter = "\r\n--" + boundary + "\r\n";
+            var close_delim = "\r\n--" + boundary + "--";
+
+            var reader = new FileReader();
+            reader.readAsBinaryString(fileData);
+            reader.onload = function (e) {
+                var contentType = fileData.type || 'application/octet-stream';
+                var metadata = {
+                    'title': fileData.name,
+                    'mimeType': contentType
+                };
+
+                var base64Data = btoa(reader.result);
+                var multipartRequestBody =
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter +
+                    'Content-Type: ' + contentType + '\r\n' +
+                    'Content-Transfer-Encoding: base64\r\n' +
+                    '\r\n' +
+                    base64Data +
+                    close_delim;
+
+                var request = gapi.client.request({
+                    'path': '/upload/drive/v2/files',
+                    'method': 'POST',
+                    'params': { 'uploadType': 'multipart' },
+                    'headers': {
+                        'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+                    },
+                    'body': multipartRequestBody
+                });
+
+                request.execute(callback);
+            }
+        }
+
+        function insertSimpleFile(fileData, callback) {
+            var reader = new FileReader();
+            reader.readAsBinaryString(fileData);
+            
+            reader.onload = function (e) {
+                var contentType = fileData.type || 'application/octet-stream';
+                //var base64Data = btoa(reader.result);
+                var request = gapi.client.request({
+                    'path': '/upload/drive/v2/files',
+                    'method': 'POST',
+                    'params': {
+                        'uploadType':'media'
+                    },
+                    'headers': {
+                        'Content-Type': contentType,
+                        'Transfer-Encoding': 'chunked'
+                    },
+                    'body': reader.result
+                });
+
+                request.execute(callback);
+            }
+        }
+
+        /**
+ * Retrieve a list of File resources.
+ *
+ * @param {Function} callback Function to call when the request is complete.
+ */
+        function retrieveAllFiles() {
+            var retrievePageOfFiles = function (request, result) {
+                request.execute(listItems);
+            }
+            //var initialRequest = gapi.client.drive.files.list();
+            var initialRequest = gapi.client.request({
+                'path': '/drive/v2/files',
+                'method': 'GET',
+                'params': { 'maxResults': '10' }
+            });
+            retrievePageOfFiles(initialRequest, []);
+
+
+        }
+
+        function listItems(resp) {
+            var result = resp.items;
+            var i = 0;
+            for (i = 0; i < result.length; i++) {
+                console.log(result[i].title);
+                output.textContent += '\n' + result[i].title;
+            }
+
+        }
+
+            function getAllFolders(folderName) {
+                var request = gapi.client.request({
+                    'path': 'drive/v2/files',
+                    'method': 'GET',
+                    'params': {
+                        'maxResults': '20',
+                        'q':"mimeType = 'application/vnd.google-apps.folder' and title contains '" + folderName + "'"
+                    }
+                });
+            
+                request.execute(listItems);
+            }
+
+            function getFolder(folderName) {
+                
+            }
+
+            function createFolder(folderName) {
+                var request = gapi.client.request({
+                    'path': 'drive/v2/files',
+                    'method': 'POST',
+                    'body': {
+                        'title': folderName,
+                        'mimeType': 'application/vnd.google-apps.folder'
+                    }
+                });
+
+                request.execute(printout);
+            }
+
+            
+
+            function printout(result) {
+                console.log(result);
+                output.textContent += '\n' + result;
+            }
+
+            function create() {
+                var folderName = txtQuery.value;
+                createFolder(folderName);
+            }
+
+            function searchFor(query, type) {
+                var request = gapi.client.request({
+                    'path': '/drive/v2/files',
+                    'method': 'GET',
+                    'params': { 'maxResults': '10', 'q': "title='" + query + "' and mimeType='" + type + "'" }
+                });
+
+                request.execute(listItems);
+            }
+            
+            function search() {
+                var query = txtQuery.value;
+                searchFor(query, "application/vnd.google-apps.folder");
+            }
+
+            function insertFileInFolder(folderName, file) {
+
+            }
+
+    </script>
+    <script type="text/javascript" src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+  </head>
+  <body>
+    <!--Add a file picker for the user to start the upload process -->
+    <input type="file" id="filePicker" style="display: none" />
+    <input type="button" id="authorizeButton" style="display: none" value="Authorize" />
+    <input type="button" id="retrieveAllFiles" value="retrieveAll" onclick="retrieveAllFiles()" />
+    <input type="button" id="listFoldersButton" value="listFolders" onclick="getAllFolders()" />
+    <input type="text" id="txtQuery" value="searchText" />
+    <input type="button" id="createAppartee" value="createFolder" onclick="create()" />
+    <input type="button" id="btnSearch" value="search" onclick="search()" />
+    <textarea rows="20" cols="100" id="output"></textarea>
+  </body>
+</html>

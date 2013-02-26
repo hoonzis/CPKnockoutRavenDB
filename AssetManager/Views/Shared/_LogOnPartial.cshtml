@@ -1,0 +1,8 @@
+﻿﻿@if (Request.IsAuthenticated){
+     <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Logged as: Tester<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="#">Profile</a></li>
+            <li><a href="/Home/Account/LogOff">Sign Out</a></li>
+        </ul>
+    </li>}
+ else{<li><a href="/Home/Account/LogOn">Log On</a></li>}

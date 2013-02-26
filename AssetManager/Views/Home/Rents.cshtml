@@ -1,0 +1,121 @@
+﻿@using BasicResources = AssetManager.Resources.BasicResources
+<div class="page-header">
+    <h1>@BasicResources.Rents</h1>
+</div>
+<div class="row-fluid">
+    <div class="span6">
+        <div class="row-fluid">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                    <tr>
+                        <th>@BasicResources.Name</th>
+                        <th>@BasicResources.Amount</th>
+                        <th>@BasicResources.Counterparty</th>
+                        <th>@BasicResources.Actions</th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: rents">
+                    <tr style="cursor: pointer;" data-bind="click:select">
+                        <td style="vertical-align: middle">
+                            <div data-bind='text: name'></div>
+                        </td>
+                        <td style="vertical-align: middle">
+                            <div data-bind="text:deposit"></div>
+                        </td>
+                        <td style="vertical-align: middle">
+                            <div data-bind="text: amount"></div>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn" data-bind="visibility: !isNew,click:remove"><i class="icon-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="btn-group pull-right">
+                <button class="btn btn-success" data-bind="click: newRent"><i class="icon-plus-sign icon-white"></i>@BasicResources.New</button>
+            </div>
+
+            
+
+        </div>
+
+        <br />
+        <div class="well">
+            <h4>@BasicResources.RentsRepartition</h4>
+            <div id="rentsGraph" style="height: 150px"></div>
+        </div>
+
+    </div>
+    <div class="span6" data-bind="with: selectedRent">
+        <form class="well form-horizontal">
+            <div class="control-group" data-bind="css : {error:!name.isValid()}">
+                <label class="control-label">@BasicResources.Name</label>
+                <div class="controls">
+                    <input type="text" data-bind="value: name" placeholder="@BasicResources.Name" />
+                    <span class="help-inline" data-bind="validationMessage: name"></span>
+                </div>
+            </div>
+            <div class="control-group" data-bind="css : {error:!amount.isValid()}">
+                <label class="control-label">@BasicResources.Amount</label>
+                <div class="controls">
+                    <input type="text" data-bind="value: amount" placeholder="@BasicResources.Amount"/>
+                    <span class="help-inline" data-bind="validationMessage: amount"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+
+                <label class="control-label">@BasicResources.AccountNumber</label>
+                <div class="controls">
+                    <input type="text" placeholder="@BasicResources.AccountNumber" data-bind="value: account">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">@BasicResources.PaymentDay</label>
+                <div class="controls">
+                    <input type="number" data-bind="value:paymentDay" min="1" max="31" />
+                    <span class="help-inline" data-bind="validationMessage: paymentDay"></span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">@BasicResources.PayEvery</label>
+                <div class="controls">
+                    <select data-bind="value:unit">
+                        <option value="1">
+                        Each month<option>
+                        <option value="2">
+                        Every 2 months<option>
+                        <option value="4">
+                        Every 4 months<option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">@BasicResources.Deposit</label>
+                <div class="controls">
+                    <input type="text" data-bind="value: deposit" placeholder="@BasicResources.Deposit" />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">@BasicResources.Notes</label>
+                <div class="controls">
+                    <textarea rows="2" data-bind="value: notes" placeholder="@BasicResources.Notes"></textarea>
+                </div>
+            </div>
+            <div class="btn-group pull-right">
+                <button type="submit" class="btn btn-success" data-bind="click: save,text:updateText"></button>
+                <div>
+                    <i class="icon-repeat" data-bind="visible: isBusy"></i><span data-bind="text:message"></span>
+                </div>
+            </div>
+            <br />
+        </form>
+    </div>
+</div>
+
+
+
