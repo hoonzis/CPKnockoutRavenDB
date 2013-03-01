@@ -12,18 +12,23 @@
 	</ul>
 	
 	<h2>The architecture of the application</h2>
-	<p>The basic architecture can be shown 
+	<p>The architecture is visualized in the following diagram. The backend is composed of MVC application, which exposes several API controllers. These controllers talk directly to the database throught RavenDB IDocumentSession interface. The REST services are invoked by ViewModel code written in JavaScript. The content of the ViewModels is bound the view using Knockout.</p>
+	
 	<p>This application is as lightweight as possible. It is composed of a MVC 4 application with two types of Controllers: Standard and API. Standard controllers are the ones which are used to render the base web pages. Event though that this applications uses client side MVVM, it has to be hosted. I have chosed to host the applications inside the classic ASP.MVC application. It is not a sin to mix server and client side MVC in one application.</p>
 	
 	<p>This application has no service layer. All the logic can be found inside the Controllers. The controllers all use directly the <b>IDocumentSession</b> of RavenDB to access the database. The good approach to user RavenDB when using ASP.MVC is described on the official web page. Basically the RavenDB session is openned when the controllers action is started and is closed when the action terminates. The structure of API controller however differs a little bit, but the principle is the same.</p>
-	
 	
 	<h3>When to use Knockout</h3>
 	<p>There are probably a lot of people around there with exactly the same question. It basically comes to the answer of whether to use or not any client side MVC JavaScript framework. From my purely personal point of view this makes sence when one or more of these conditions are filled:
 	<ul><li>You have a good server side REST API (or you plan to build one) and wan't to use it to build a web page.</li>
 	<li>You are building more an web-application then a website. That is to say, your users will stay at the page for some time, perform multiple actions and you need a responsive application for that.</li>
 	<li>You need a really dynamic page. Even if you would use server side MVC than you would somehow need to include a lot of JavaScript for the dynamics of the page.</li></ul>
-	
-	
 	</body>
+	<h2>The Backend</h2>
+	<h3>Controller returning all assets</h3>
+	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <b>http://server/assets</b>. This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting all the current user and all it's assets is a metter of two linq queries using the RavenSession.</p>
+	<h3>Opening RavenDB session</h3>
+	<h2>The FrontEnd</h2>
+	<p>All the logic on the client side resides in ViewModel classes. I assume you are familiar with MVVM pattern. If not you can still continue reading, while the understanding should be intuitive if you have worked with MVC frameworks before. The parent ViewModel and the one which aggregates others is the <b>OwnerViewModel</b>. The ViewModels build a hierarchy similary as the domain objects.</p>
+	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset.
 </html>
