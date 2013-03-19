@@ -58,5 +58,47 @@
 	<pre>
 	
 	</pre>
-	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. Here is the left side menu which 
+	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. The parent layout is defined in <i>_Layout.cshtml<i> however the part mastered by Knockout is defined in the <i>Index.cshtml</i> file. The left side menu is composed of two smaller menus. One which contains the list of properties with the possibility to create new one and another one which allows to switch over details of the selected property. Here is the View representing the first menu:</p>
+	<pre>
+		<div class="well sidebar-nav">
+            <li class="nav-header">Property list:</li>
+            <ul class="nav nav-list" data-bind="foreach:assets">
+                <li><a data-bind="text:name,click:select" href="#"></a></li>
+            </ul>
+            <ul class="nav nav-list">
+                <li class="nav-header">Actions:</li>
+                <li><a href="#" data-bind="click: newAsset"><i class="icon-pencil"></i>@BasicResources.NewProperty</a></li>
+            </ul>
+        </div>
+	</pre>
+	<p><b>Foreach binding</b> was used in order to render all the appartments. For each appartment an anchor tag is emitted. The text of this tag is bound to the name of the appartment and the click actions is bound to the <i>select</i> function. The creation of new asset is handled by the <i>newAsset</i> function of the <i>OwnerViewModel</i>.</p>
+	<p>The second part of the menu is defined directly as html. Three anchor tags are render, each of them pointing to different tab, using the same url pattern. For example the URL "#/{property-name}/overview" should show the "Overview" tab of the property with given name. Client side routing is used, in order to execute certain actions depending on the accessed url. In order to enable client side rendering <b>Path.JS</b> library is used. The <b>attribute binding of knockout</b> is used to render the correct anchor tag.</p>
+	<pre>
+		<div class="well sidebar-nav" data-bind="with:selectedAsset">
+			<ul class="nav nav-list">
+				<li class="nav-header" data-bind="text:name"></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/overview'}"><i class="icon-pencil"></i>@BasicResources.Overview</a></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/charges'}"><i class="icon-arrow-down"></i>@BasicResources.Charges</a></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/rents'}"><i class="icon-arrow-up"></i>@BasicResources.Rents</a></li>
+			</ul>
+		</div>
+	</pre>
+	<p>You can also notice, that the <b>with binding</b> was used to set the current asset view model as the parent for the navigation div.</p>
+	<p>The right part simply contains all of the 3 tabs (overview, charges or rents), only one of them visible at time. In order to separate the content into multiple files, partial rendering of ASP.MVC is used.<p>
+	<pre>
+		<div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}">
+			<div class="span10">
+				<div id="overview">
+					@Html.Partial("Overview")
+				</div>
+				<div id="charges">
+					@Html.Partial("Charges")
+				</div>
+				<div id="rents">
+					@Html.Partial("Rents")
+				</div>
+			</div>
+		</div>
+	</pre>
+	<p>Again the <b>with binding</p> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
 </html>

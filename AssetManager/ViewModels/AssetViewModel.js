@@ -2,7 +2,7 @@
     var self = this;
     $.extend(self, new BaseViewModel());
     
-	self.city = ko.observable();
+    self.city = ko.observable();
     self.country = ko.observable();
     self.zipCode = ko.observable();
     self.address = ko.observable();
@@ -23,8 +23,8 @@
     self.interestRate = ko.observable(0);
     self.edit = ko.observable(false);
     self.modeText = ko.observable(resourceProvider.update);
-	
-	
+    
+    
     self.saveText = ko.computed(function () {
         if (self.isBusy())
             return resourceProvider.saving;
@@ -175,7 +175,7 @@
         
         return JSON.stringify(model);
     };
-	
+    
     self.computePMS = function () {
         self.pms((self.price() / self.size()).toFixed(2));
     };
@@ -187,12 +187,4 @@
         else
             self.modeText(resourceProvider.update);
     };
-
-    self.charges.subscribe(function () {
-        showChargesGraph(self);
-    });
-
-    self.rents.subscribe(function () {
-        showRentsGraph(self);
-    });
 }

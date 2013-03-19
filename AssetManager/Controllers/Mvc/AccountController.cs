@@ -69,7 +69,7 @@ namespace AssetManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                Owner owner = new Owner { UserName = model.UserName, Password = model.Password, Email = model.Email };
+                Owner owner = new Owner { UserName = model.UserName, Password = model.Password};
                 RavenSession.Store(owner);
                 FormsAuthentication.SetAuthCookie(model.UserName, false /* createPersistentCookie */);
                 return RedirectToAction("Index", "Home");   

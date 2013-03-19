@@ -8,7 +8,6 @@ using System.Web;
 using AssetManager.Controllers;
 using AssetManager.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Raven.Client;
 using Raven.Client.Embedded;
 

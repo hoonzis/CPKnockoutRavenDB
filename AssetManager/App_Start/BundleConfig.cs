@@ -16,7 +16,9 @@ namespace AssetManager
 
             bundles.Add(new ScriptBundle("~/bundles/vms").IncludeDirectory("~/ViewModels/", "*.js"));
             
-            bundles.Add(new ScriptBundle("~/bundles/tech").IncludeDirectory("~/Scripts/tech/", "*.js"));
+            bundles.Add(new ScriptBundle("~/bundles/tech")
+                .Include("~/Scripts/tools.js")
+                .IncludeDirectory("~/Scripts/KoExtensions/", "*.js"));
 
             //the css has to be bundled to resamble "Content" directory,
             //because Bootstrap uses relative urls to search the images

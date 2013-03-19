@@ -42,8 +42,6 @@
     <Compile Include="FinancialEnvironement.cs" />
     <Compile Include="FinancialResults.cs" />
     <Compile Include="FinancialSummary.cs" />
-    <Compile Include="GoogleCharts.cs" />
-    <Compile Include="ImportedPayment.cs" />
     <Compile Include="ObligationYear.cs" />
     <Compile Include="Owner.cs" />
     <Compile Include="PayedObligation.cs" />
@@ -52,7 +50,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Regularity.cs" />
     <Compile Include="Rent.cs" />
-    <Compile Include="Renter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

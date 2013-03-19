@@ -174,51 +174,12 @@
     <Content Include="JSTests\ChargeViewModelTests.js" />
     <Content Include="JSTests\PaymentViewModelTests.js" />
     <Content Include="JSTests\TestPage.html" />
-    <Content Include="quickstart.html" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js">
       <DependentUpon>bootstrap.js</DependentUpon>
     </Content>
-    <Content Include="Scripts\d3.chart.js" />
-    <Content Include="Scripts\d3.chart.min.js">
-      <DependentUpon>d3.chart.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\d3.csv.js" />
-    <Content Include="Scripts\d3.csv.min.js">
-      <DependentUpon>d3.csv.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\d3.geo.js" />
-    <Content Include="Scripts\d3.geo.min.js">
-      <DependentUpon>d3.geo.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\d3.geom.js" />
-    <Content Include="Scripts\d3.geom.min.js">
-      <DependentUpon>d3.geom.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\d3.js" />
-    <Content Include="Scripts\d3.layout.js" />
-    <Content Include="Scripts\d3.layout.min.js">
-      <DependentUpon>d3.layout.js</DependentUpon>
-    </Content>
     <Content Include="Scripts\d3.LICENSE.txt" />
-    <Content Include="Scripts\d3.min.js">
-      <DependentUpon>d3.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\d3.time.js" />
-    <Content Include="Scripts\d3.time.min.js">
-      <DependentUpon>d3.time.js</DependentUpon>
-    </Content>
     <Content Include="Scripts\d3.v2.min.js" />
-    <Content Include="Scripts\g.bar-min.js" />
-    <Content Include="Scripts\g.bar.js" />
-    <Content Include="Scripts\g.dot-min.js" />
-    <Content Include="Scripts\g.dot.js" />
-    <Content Include="Scripts\g.line-min.js" />
-    <Content Include="Scripts\g.line.js" />
-    <Content Include="Scripts\g.pie-min.js" />
-    <Content Include="Scripts\g.pie.js" />
-    <Content Include="Scripts\g.raphael-min.js" />
-    <Content Include="Scripts\g.raphael.js" />
     <None Include="Scripts\jquery-1.9.0.intellisense.js" />
     <Content Include="Scripts\jquery-1.9.0.js" />
     <Content Include="Scripts\jquery-1.9.0.min.js" />
@@ -226,20 +187,20 @@
     <Content Include="Scripts\knockout-2.2.1.js" />
     <Content Include="Scripts\knockout.validation.debug.js" />
     <Content Include="Scripts\knockout.validation.js" />
+    <Content Include="Scripts\KoExtensions\charting.js" />
+    <Content Include="Scripts\KoExtensions\kotools.js" />
+    <Content Include="Scripts\KoExtensions\tools.js" />
     <Content Include="Scripts\modernizr-2.0.6-development-only.js" />
     <Content Include="Scripts\path.js" />
     <Content Include="Scripts\path.min.js">
       <DependentUpon>path.js</DependentUpon>
     </Content>
-    <Content Include="Scripts\tech\charting.js" />
-    <Content Include="Scripts\tech\technical.js" />
     <Content Include="Scripts\qunit.js" />
-    <Content Include="Scripts\raphael-min.js" />
-    <Content Include="Scripts\raphael.js" />
     <Content Include="Scripts\rickshaw.js" />
     <Content Include="Scripts\rickshaw.min.js">
       <DependentUpon>rickshaw.js</DependentUpon>
     </Content>
+    <Content Include="Scripts\tools.js" />
     <Content Include="ViewModels\BaseViewModel.js" />
     <Content Include="ViewModels\ChargeViewModel.js" />
     <Content Include="ViewModels\AssetViewModel.js" />

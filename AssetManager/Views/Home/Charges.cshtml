@@ -49,7 +49,8 @@
         
         <div class="well">
             <h4>@BasicResources.ChargesRepartition</h4>
-            <div id="chargesGraph" style="height: 150px">
+            <div id="chargesChart" data-bind="piechart: charges, transformation:obligationToChart">
+
             </div>
         </div>
         
