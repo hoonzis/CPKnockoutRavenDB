@@ -8,7 +8,7 @@
 		<li>WebAPI - to serve the data through REST services. WebAPI is a quite new technology from MS which is ment to provide better support for building REST services. Ofcourse we have build REST services with WCF before, so the questions is why should we change to WebAPI? WCF was created in the age of WSDL. It was adapted later to generate JSON, however inside it still uses XML as data transformation format. WebAPI is complete rewrite which also provides other interesting features.</li>
 		<li>KnockoutJS - to glue the interaction on the client side. Knockout is one of the cool JavaScript MV* frameworks which provide a way to organise and facilitate the JavaScript developement. Unlike other frameworks (Backbone or Ember) KnockoutJS concentrate itself on binding of the data and actions between the GUI (HTML) and the ViewModel (JavaScript).</li>
 		<li>Bootstrap - to give it a decent GUI. As its name says, bootstrap enables a quick developement of a web application's GUI. It is a greate tool to all of us who just want to get the project out and we still need a decent user interface.</li>
-		<li>gRaphael - to visualize data using charts. RaphaelJS is a JavaScript framework enabling the manipulation of SVG and thus generation of vector graphics inside a web page. gRaphael is another library build on top of Raphael which provides functions to draw pie and bar charts.</li>
+		<li>D3JS - to visualize data using charts. D3JS is a JavaScript libraty enabling the user to manipulate the DOM.</li>
 	</ul>
 	
 	<h2>The architecture of the application</h2>
@@ -30,5 +30,33 @@
 	<h3>Opening RavenDB session</h3>
 	<h2>The FrontEnd</h2>
 	<p>All the logic on the client side resides in ViewModel classes. I assume you are familiar with MVVM pattern. If not you can still continue reading, while the understanding should be intuitive if you have worked with MVC frameworks before. The parent ViewModel and the one which aggregates others is the <b>OwnerViewModel</b>. The ViewModels build a hierarchy similary as the domain objects.</p>
-	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset.
+	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset. The data is retrived from the server as JSON using asynchronous request.</p>
+	<pre>
+	function OwnerViewModel() {
+		var self = this;
+		$.extend(self, new BaseViewModel());
+		self.assets = ko.observableArray([]);
+		self.selectedAsset = ko.observable([]);
+		self.isBusy(true);
+		self.message('Loading');
+
+		$.ajax("/../api/assets", {
+			type: "get", contentType: "application/json",
+			statusCode: {
+				401: function () { window.location = "/en/Account/LogOn" }
+			},
+			success: function (data) {
+				var mappedAssets = $.map(data, function (item) {
+					return new AssetViewModel(self, item);
+				});
+				self.assets(mappedAssets);
+			}
+		});
+	</pre>
+	<p>You can notice that this ViewModel calls jQuery's <b>$.extend</b> method right at the begining of the function. This is one of the ways to express inheritance in JavaScript. JavaScript is prototype based language. The objects derive directly from other objects, not from classes. The extend method basically copies all properties from the object specified in the parameter. All of my <i>ViewModels</i> have certain common properties such as <i>busy</i> or <i>message</i>. These are some help variables which I use on all ViewModels to visualize progress or show some info messages. Notice also the <i>selectedAsset</i> property, which holds the currently selected AsseetViewModel (imagine user selecting one line in the table of assets).</p>
+	<p>Wihtout further examination let's take a look at the <b>AssetViewModel</b>. There are several self-epxlanatory properties such as <i>address</i>, <i>price</i> and similar. What is more interesting are the arrays of <i>Rents</i> and <i>Charges</i>. These are observable arrays of ViewModels which are filled during the construction of the AssetViewModel object. The data to this object is passed from the <i>OwnerViewModel</i>. The asset also holds its value to the owner in the <i>parent</i> property.</p>
+	<pre>
+	
+	</pre>
+	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. Here is the left side menu which 
 </html>

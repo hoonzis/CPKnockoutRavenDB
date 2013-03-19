@@ -1,9 +1,8 @@
 ﻿function AssetViewModel(parent,data) {
     var self = this;
     $.extend(self, new BaseViewModel());
-
-    self.files = new ko.observable(new FilesViewModel(self));
-    self.city = ko.observable();
+    
+	self.city = ko.observable();
     self.country = ko.observable();
     self.zipCode = ko.observable();
     self.address = ko.observable();
