@@ -26,9 +26,6 @@ namespace AssetManager
                 .Include("~/Content/rickshaw.min.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/charting")
-                .Include("~/Scripts/raphael-min.js")
-                .Include("~/Scripts/g.raphael-min.js")
-                .Include("~/Scripts/g.pie-min.js")
                 .Include("~/Scripts/d3.v2.min.js")  
                 .Include("~/Scripts/rickshaw.js"));
 
