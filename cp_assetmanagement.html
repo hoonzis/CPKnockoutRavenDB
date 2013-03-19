@@ -25,9 +25,44 @@
 	<li>You need a really dynamic page. Even if you would use server side MVC than you would somehow need to include a lot of JavaScript for the dynamics of the page.</li></ul>
 	</body>
 	<h2>The Backend</h2>
-	<h3>Controller returning all assets</h3>
+	<ul>
+		<li><b>GET api/assets</b> - get the list of all the appartment of current user</li>
+		<li><b>PUT api/charges?assetID={id}</b> - add new charge to existing asset</li>
+		<li><b>POST api/charges?assetID={id}</b> - update existing charge in given asset</li>
+		<li><b>PUT api/rents/</b> - add new charge</li>
+		<li><b>POST api/rents</b> - update existing charge</li>
+	</ul>
+	<h3>Getting all the assets</h3>
 	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <b>http://server/assets</b>. This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting all the current user and all it's assets is a metter of two linq queries using the RavenSession.</p>
 	<h3>Opening RavenDB session</h3>
+	<pre>
+	protected override void Initialize(System.Web.Http.Controllers.HttpControllerContext controllerContext)
+	{
+		base.Initialize(controllerContext);
+		if(RavenSession == null)
+			RavenSession = WebApiApplication.Store.OpenSession();
+	}
+	</pre>
+	<h3>Adding new Charge</h3>
+	<p>This controller has two parametes. The charge object which is passed in as JSON object and the <i>assetID</i> which is specified as URL parameter. Since RavenDB provides changes tracking, there is no need to perform additional work. RavenDB will notice, that new charge was added to the <i>Charges</i> collection and when <i>SaveChanges</i> function is invoked on the Raven session, the new charge will be persisted to the database. As it has been explained before, the <i>SaveChanges</i> is invoked while disposing the controller.</p>
+	
+	<pre>
+		public Object Post(Charge value, int assetID)
+		{
+			var owner = ObtainCurrentOwner();
+			var asset = GetAsset(assetID,owner);
+			value.Id = asset.GenerateChargeId();
+			
+			if (asset.Charges == null)
+			{
+				asset.Charges = new List<Charge>();
+			}
+
+			asset.Charges.Add(value);
+
+			return GetResponse(value, asset, true);
+		}
+	</pre>
 	<h2>The FrontEnd</h2>
 	<p>All the logic on the client side resides in ViewModel classes. I assume you are familiar with MVVM pattern. If not you can still continue reading, while the understanding should be intuitive if you have worked with MVC frameworks before. The parent ViewModel and the one which aggregates others is the <b>OwnerViewModel</b>. The ViewModels build a hierarchy similary as the domain objects.</p>
 	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset. The data is retrived from the server as JSON using asynchronous request.</p>
@@ -101,4 +136,5 @@
 		</div>
 	</pre>
 	<p>Again the <b>with binding</p> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
+	<p>Now let's go back to the ViewModels. <b>ChargeViewModel</b> and <b>RentViewModel</b> have a same ancestor which is called <b>ObligationViewModel</b>. Since both rents and charges how some common properties such as the amount or the regularity, a common parent ViewModel is good place to define them.
 </html>

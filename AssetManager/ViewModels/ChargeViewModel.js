@@ -7,10 +7,6 @@
 
     self.errors = ko.validation.group(self);
 
-    self.showInCalendar = ko.computed(function () {
-        return self.sCalendar().length > 0;
-    }, self);
-
     self.canSave = ko.computed(function () {
         var isOK = self.errors().length == 0;
         return isOK;
@@ -21,11 +17,9 @@
         //map charge specific values
         self.counterparty(data.Counterparty);
         //map common properties inside the ObligationViewModel
-        self.construct(data);
-        
+        self.construct(data);        
     }
 
-    
     if (data != null)
         self.update(data);
     

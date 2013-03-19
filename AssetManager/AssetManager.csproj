@@ -204,7 +204,6 @@
     <Content Include="ViewModels\BaseViewModel.js" />
     <Content Include="ViewModels\ChargeViewModel.js" />
     <Content Include="ViewModels\AssetViewModel.js" />
-    <Content Include="ViewModels\FilesViewModel.js" />
     <Content Include="ViewModels\ObligationViewModel.js" />
     <Content Include="ViewModels\OwnerViewModel.js" />
     <Content Include="ViewModels\RentViewModel.js" />
@@ -221,7 +220,6 @@
     <Content Include="Views\Web.config" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="ViewModels\PaymentViewModel.js" />
     <Content Include="Views\Home\Charges.cshtml" />
     <Content Include="Views\Home\Rents.cshtml" />
     <Content Include="Views\Home\Overview.cshtml" />
