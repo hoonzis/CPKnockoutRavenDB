@@ -24,6 +24,11 @@
 	<li>You are building more an web-application then a website. That is to say, your users will stay at the page for some time, perform multiple actions and you need a responsive application for that.</li>
 	<li>You need a really dynamic page. Even if you would use server side MVC than you would somehow need to include a lot of JavaScript for the dynamics of the page.</li></ul>
 	</body>
+	<h2>Data model</h2>
+	<p>RavenDB is NoSQL database, or as it would be better to say non-relational database. The data is stored in document collections, serialized to JSON. Each document contains an object or more specifically graph of objects serialized to JSON. When working with relational databases, the aggregated graph of objects which is served to the user is usually constructed by several joins into several tables. When working with document databases, the data which is aggregated into one object graph, should be also stored that way. In our particular example, on property or asset can have several rents and several charges. One rent does not really have sense without the asset to which it is attached. This applications is composed of two collections: Owners and Assets. Here are examples of Owner and Asset document.</p>
+	<pre>
+	</pre>
+	<p>One question you might be asking yourself is why did I not use only one collection of Owners. Each <i>Owner</i> document would than contain all the assets as an inner collection. This is just because, I thought it might make sense in the future, two have an asset shared by two owners. The current design allows us anyway in the future, connect the asset to an collection of Owners, simply by replacing <i>OwnerID</i> property with and collection of integers, containing all the ids of the owners.</p>
 	<h2>The Backend</h2>
 	<ul>
 		<li><b>GET api/assets</b> - get the list of all the appartment of current user</li>
@@ -33,8 +38,29 @@
 		<li><b>POST api/rents</b> - update existing charge</li>
 	</ul>
 	<h3>Getting all the assets</h3>
-	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <b>http://server/assets</b>. This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting all the current user and all it's assets is a metter of two linq queries using the RavenSession.</p>
+	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <i>api/assets</i>.</p>
+	<pre>
+		[Authorize]
+        public IEnumerable<Object> Get()
+        {
+            var owner = ObtainCurrentOwner();
+            var assets = GetAssets(owner.Id);
+            return result;
+        }
+		
+		protected Owner ObtainCurrentOwner()
+        {
+            return RavenSession.Query<Owner>().SingleOrDefault(x => x.UserName == HttpContext.Current.User.Identity.Name);
+        }
+		
+		public IEnumerable<Asset> GetAssets(int ownerID)
+        {
+            return RavenSession.Query<Asset>().Where(x => x.OwnerId == ownerID);
+        }
+	</pre>
+	<p>This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting the current user and all it's assets is a metter of two linq queries using the <b>RavenSession.</b> which has to be opened before.</p>
 	<h3>Opening RavenDB session</h3>
+	<p>All the controllers inherit from a base controller called <i>RavenApiController</i>. This controller opens the session to RavenDB when it is initialized and than potentially saves the changes to the database when the work is finished. The <i>dispose</i> method of the controller is the last method which is invoked when the work is over.</p>
 	<pre>
 	protected override void Initialize(System.Web.Http.Controllers.HttpControllerContext controllerContext)
 	{
@@ -42,10 +68,20 @@
 		if(RavenSession == null)
 			RavenSession = WebApiApplication.Store.OpenSession();
 	}
+	
+	protected override void Dispose(bool disposing)
+	{
+		base.Dispose(disposing);
+		using (RavenSession)
+		{
+			if (RavenSession != null)
+				RavenSession.SaveChanges();
+		}
+	}
 	</pre>
+	<p></p>
 	<h3>Adding new Charge</h3>
 	<p>This controller has two parametes. The charge object which is passed in as JSON object and the <i>assetID</i> which is specified as URL parameter. Since RavenDB provides changes tracking, there is no need to perform additional work. RavenDB will notice, that new charge was added to the <i>Charges</i> collection and when <i>SaveChanges</i> function is invoked on the Raven session, the new charge will be persisted to the database. As it has been explained before, the <i>SaveChanges</i> is invoked while disposing the controller.</p>
-	
 	<pre>
 		public Object Post(Charge value, int assetID)
 		{
@@ -55,14 +91,14 @@
 			
 			if (asset.Charges == null)
 			{
-				asset.Charges = new List<Charge>();
+				asset.Charges = new List&lt;Charge&gt;();
 			}
 
 			asset.Charges.Add(value);
-
 			return GetResponse(value, asset, true);
 		}
 	</pre>
+	<p>Note that if you want to acceess the <i>Charge</i> object in the future, you need to give it and ID. RavenDB does generated ID's only for documents, but not for any inner objects. The solution here is to give each Asset and id counter for the charges.
 	<h2>The FrontEnd</h2>
 	<p>All the logic on the client side resides in ViewModel classes. I assume you are familiar with MVVM pattern. If not you can still continue reading, while the understanding should be intuitive if you have worked with MVC frameworks before. The parent ViewModel and the one which aggregates others is the <b>OwnerViewModel</b>. The ViewModels build a hierarchy similary as the domain objects.</p>
 	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset. The data is retrived from the server as JSON using asynchronous request.</p>
@@ -112,29 +148,59 @@
 		<div class="well sidebar-nav" data-bind="with:selectedAsset">
 			<ul class="nav nav-list">
 				<li class="nav-header" data-bind="text:name"></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/overview'}"><i class="icon-pencil"></i>@BasicResources.Overview</a></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/charges'}"><i class="icon-arrow-down"></i>@BasicResources.Charges</a></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/rents'}"><i class="icon-arrow-up"></i>@BasicResources.Rents</a></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/overview'}"><i class="icon-pencil"></i>Overview</a></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/charges'}"><i class="icon-arrow-down"></i>Charges</a></li>
+				<li><a data-bind="attr: {href: '#/' + name() + '/rents'}"><i class="icon-arrow-up"></i>Rents</a></li>
 			</ul>
 		</div>
 	</pre>
 	<p>You can also notice, that the <b>with binding</b> was used to set the current asset view model as the parent for the navigation div.</p>
 	<p>The right part simply contains all of the 3 tabs (overview, charges or rents), only one of them visible at time. In order to separate the content into multiple files, partial rendering of ASP.MVC is used.<p>
 	<pre>
-		<div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}">
-			<div class="span10">
-				<div id="overview">
+		&lt;div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}"&gt;
+			&lt;div class="span10"&gt;
+				&lt;div id="overview"&gt;
 					@Html.Partial("Overview")
-				</div>
-				<div id="charges">
+				&lt;/div&gt;
+				&lt;div id="charges"&gt;
 					@Html.Partial("Charges")
-				</div>
-				<div id="rents">
+				&lt;/div&gt;
+				&lt;div id="rents"&gt;
 					@Html.Partial("Rents")
-				</div>
-			</div>
-		</div>
+				&lt;/div&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
 	</pre>
 	<p>Again the <b>with binding</p> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
-	<p>Now let's go back to the ViewModels. <b>ChargeViewModel</b> and <b>RentViewModel</b> have a same ancestor which is called <b>ObligationViewModel</b>. Since both rents and charges how some common properties such as the amount or the regularity, a common parent ViewModel is good place to define them.
+	<p>Now let's go back to the ViewModels. <b>ChargeViewModel</b> and <b>RentViewModel</b> have a same ancestor which is called <b>ObligationViewModel</b>. Since both rents and charges how some common properties such as the amount or the regularity, a common parent ViewModel is good place to define them.</p>
+	<p>The most interesting part of <i>ChargeViewModel</i> is the <i>save</i> function which uses JQuery to emit a HTTP request to the <i>ChargesController</i>. As previously described, two different operations are exposed with the same url, one for creation (HTTP PUT) another for update (HTTP POST). The ViewModel uses a <i>new</i> flag to distinguish these two cases. Before the request is executed, the ViewModel uses <a href="https://github.com/ericmbarnard/Knockout-Validation">Knockout.Validation</a> plugin to perform this check with the<i>errors</i> property.</p>
+	<pre>
+	self.save = function () {
+        if (self.errors().length != 0) {
+            self.errors().showAllMessages();
+            return;
+        }
+
+        self.isBusy(true);
+        data = self.toDto();
+        var rUrl = "/../api/charges?assetID=" + self.parent.id();
+        if (self.isNew())
+            var opType = "post";
+        else
+            var opType = "put";
+
+        $.ajax(rUrl, {
+            data: JSON.stringify(data),
+            type: opType, contentType: "application/json",
+            success: function (result) {
+                self.isBusy(false);
+                self.message(result.message);
+                if (self.isNew()) {
+                    self.update(result.dto);
+                    parent.charges.push(self);
+                }
+            }
+        });
+    }
+	</pre>
 </html>

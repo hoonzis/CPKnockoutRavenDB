@@ -32,13 +32,10 @@
         self.isBusy(true);
         data = self.toDto();
         var rUrl = "/../api/charges?assetID=" + self.parent.id();
-
         if (self.isNew())
             var opType = "post";
-
         else
             var opType = "put";
-
 
         $.ajax(rUrl, {
             data: JSON.stringify(data),

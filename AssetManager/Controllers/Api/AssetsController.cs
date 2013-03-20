@@ -16,15 +16,7 @@ namespace AssetManager.Controllers
         public IEnumerable<Object> Get()
         {
             var owner = ObtainCurrentOwner();
-            if (owner == null)
-            {
-                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden));
-            }
-            var assets = GetAssets(owner.Id);
-
-            var result = assets;
-
-            return result;
+            return GetAssets(owner.Id);
         }
 
         // GET api/assets/5

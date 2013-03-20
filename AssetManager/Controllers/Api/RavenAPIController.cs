@@ -24,17 +24,14 @@ namespace AssetManager.Controllers
 
         protected Owner ObtainCurrentOwner()
         {
-
-            var owner = RavenSession.Query<Owner>().SingleOrDefault(x => x.UserName == HttpContext.Current.User.Identity.Name);
-            return owner;
+            return RavenSession.Query<Owner>().SingleOrDefault(x => x.UserName == HttpContext.Current.User.Identity.Name);
         }
 
         public Asset GetAsset(int id, Owner owner)
         {
             if (owner == null)
                 return null;
-            var asset = RavenSession.Query<Asset>().SingleOrDefault(x => x.Id == id && x.OwnerId == owner.Id);
-            return asset;
+            return = RavenSession.Query<Asset>().SingleOrDefault(x => x.Id == id && x.OwnerId == owner.Id);
         }
 
         public IEnumerable<Asset> GetAssets(int ownerID)
