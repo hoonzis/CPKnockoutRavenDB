@@ -203,4 +203,22 @@
         });
     }
 	</pre>
+	<p>When there are no validation errors, the object which will be send to the server is created from the ViewModel by the <i>toDto</i> method. It does not make sense to serialize the whole ViewModel and send it to the server. In the <i>toDto</i> method the ViewModel is converted to an JS object which can be directly mapped to the server side entity. The <i>ajax</i> method of jQuery is called, which creates new HTTP request. When the response from the server comes back, the callback is executed, which performs several operations. Besides updating the GUI-helpful variables the callback performs two different operations. If the new charge was added, then it has to be added also to the parent ViewModel(appartment - represented by <i>AssetViewModel</i>). The new charge also recieved the server side ID which has to be updated. All other properties are already up-to-date.
+	</p>
+	<h3>Removing charge</h3>
+	<p>The removing operations is very simple. Only asset and charge ids have to be supplied to the controller. If the operations has succeed, then againg the collection of charges  inside <i>AssetViewModel</i> has to be updated.</p>
+	<pre>
+	self.remove = function () {
+        $.ajax("/../api/charges/" + self.id() + "?assetID=" + self.parent.id(), {
+            type: "delete", contentType: "application/json",
+            success: function (result) {
+                self.isBusy(false);
+                parent.charges.remove(self);
+                parent.selectedCharge(null);
+            }
+        });
+    };
+	</pre>
+	<h3>Charges View</h3>
+	<p>The charges view takes 
 </html>
