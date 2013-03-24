@@ -1,8 +1,8 @@
 ﻿//Takes as input collection of items [data]. Each item has two values [x] and [y].
 function d3pieChart(width, height, data, elname,showLegend) {
-    width = width / 2;
-    var outerRadius = Math.min(width, height) / 2,
-    innerRadius = outerRadius * .6,
+    width = (width + 20) / 2;
+    var outerRadius = Math.min(width, height)/ 2,
+    innerRadius = outerRadius * .55,
     color = d3.scale.category20(),
     donut = d3.layout.pie(),
     arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius),
@@ -11,7 +11,7 @@ function d3pieChart(width, height, data, elname,showLegend) {
     var maxLegendLength = max(data, function (el) { return el.x.length; });
     
     //assuming 25 pixels for the small rectangle and 7 pixels per character, rough estimation which more or less works
-    var legendWidth = 25 + maxLegendLength * 7;
+    var legendWidth = 35 + maxLegendLength * 7;
 
     donut.value(function (d) { return d.y; });
     if (showLegend) {

@@ -14,7 +14,7 @@
         },
         success: function (data) {
             var mappedAssets = $.map(data, function (item) {
-				return new AssetViewModel(self, item);
+                return new AssetViewModel(self, item);
             });
             self.assets(mappedAssets);
             self.isBusy(false);

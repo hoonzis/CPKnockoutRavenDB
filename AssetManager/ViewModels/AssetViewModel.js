@@ -1,7 +1,8 @@
 ﻿function AssetViewModel(parent,data) {
     var self = this;
     $.extend(self, new BaseViewModel());
-    
+    self.lat = ko.observable();
+    self.lng = ko.observable();
     self.city = ko.observable();
     self.country = ko.observable();
     self.zipCode = ko.observable();
@@ -13,7 +14,6 @@
     self.imageUrl = ko.observable();
     self.saved = ko.observable();
     self.selectedCharge = ko.observable();
-    self.selectedPayment = ko.observable();
     self.selectedRent = ko.observable();
     self.currentYear = ko.observable(new Date().getFullYear());
     self.size = ko.observable();
@@ -33,11 +33,11 @@
     }, self);
     
     self.chargesSum = ko.computed(function () {
-        return sum(self.charges());
+        return sum(self.charges(),getAmount);
     }, self);
 
     self.rentsSum = ko.computed(function () {
-        return sum(self.rents());
+        return sum(self.rents(),getAmount);
     }, self);
    
     self.ebit = ko.computed(function () {
@@ -80,15 +80,13 @@
         self.pms(data.PMS);
         self.incomeTax(data.IncomeTax);
         self.interestRate(data.InterestRate);
+        self.lat(data.Latitude);
+        self.lng(data.Longitude);
 
         if (data.Charges != null) {
             self.charges($.map(data.Charges, function (data) {
                 return new ChargeViewModel(self, data);
             }));
-
-            self.chargesGraph = data.Charges.map(function (c) {
-                return c.Amount;
-            });
         }
 
         if (data.Rents != null) {
@@ -172,7 +170,8 @@
         model.Country = self.country();
         model.ZipCode = self.zipCode();
         model.IncomeTax = self.incomeTax();
-        
+        model.Latitude = self.lat();
+        model.Longitude = self.lng();
         return JSON.stringify(model);
     };
     

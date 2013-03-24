@@ -31,7 +31,7 @@ namespace AssetManager.Controllers
         {
             if (owner == null)
                 return null;
-            return = RavenSession.Query<Asset>().SingleOrDefault(x => x.Id == id && x.OwnerId == owner.Id);
+            return RavenSession.Query<Asset>().SingleOrDefault(x => x.Id == id && x.OwnerId == owner.Id);
         }
 
         public IEnumerable<Asset> GetAssets(int ownerID)

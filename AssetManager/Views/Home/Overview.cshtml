@@ -60,8 +60,18 @@
                 </div>
             </div>
         </div>
+
+        <div class="control-group">
+            <label class="control-label"><strong>@BasicResources.Latitude & @BasicResources.Longitude</strong></label>
+            <div class="controls">
+                <input type="text" class="input-small" placeholder="@BasicResources.Latitude" data-bind="value: lat">
+                <input type="text" class="input-small" placeholder="@BasicResources.Longitude" data-bind="value: lng" size="8">
+            </div>
+        </div>
+
         <div class="btn-group pull-right">
             <button type="submit" class="btn btn-success" data-bind="enable: !isBusy() && canSave(),click: save,text:saveText"></button>
+            <button type="submit" class="btn btn-alert" data-bind="enable: !isBusy(),click: remove">remove</button>
         </div>
     </form>
 </div>

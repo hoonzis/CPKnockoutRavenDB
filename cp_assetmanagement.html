@@ -2,7 +2,7 @@
 <html lang="en"><head>
     <title>AssetManagement: manage your properties with RavenDB + WebAPI and KnockoutJS and more</title></head>
 	<body>
-	<p>Everyone ranting an appartment are any other property knows that it might be quite difficult to track the depenses and income in order to assure himself of the rentability of the given property. I have created an applications which helps with just that and thanks to this applications I was able to play with the following technologies:</p>
+	<p>Everyone renting an appartment or any other property knows that it might be quite difficult to track the depenses and income in order to assure himself of the rentability of the given property. I have created an applications which helps with just that and thanks to this applications I was able to play with the following technologies:</p>
 	<ul>
 		<li>RavenDB - to stored the data. RavenDB is a document database, which seamlessly integrates into any C# project.</li>
 		<li>WebAPI - to serve the data through REST services. WebAPI is a quite new technology from MS which is ment to provide better support for building REST services. Ofcourse we have build REST services with WCF before, so the questions is why should we change to WebAPI? WCF was created in the age of WSDL. It was adapted later to generate JSON, however inside it still uses XML as data transformation format. WebAPI is complete rewrite which also provides other interesting features.</li>
@@ -10,6 +10,7 @@
 		<li>Bootstrap - to give it a decent GUI. As its name says, bootstrap enables a quick developement of a web application's GUI. It is a greate tool to all of us who just want to get the project out and we still need a decent user interface.</li>
 		<li>D3JS - to visualize data using charts. D3JS is a JavaScript libraty enabling the user to manipulate the DOM.</li>
 	</ul>
+	<p>Here is how it looks like at the end</p>
 	
 	<h2>The architecture of the application</h2>
 	<p>The architecture is visualized in the following diagram. The backend is composed of MVC application, which exposes several API controllers. These controllers talk directly to the database throught RavenDB IDocumentSession interface. The REST services are invoked by ViewModel code written in JavaScript. The content of the ViewModels is bound the view using Knockout.</p>
@@ -41,7 +42,7 @@
 	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <i>api/assets</i>.</p>
 	<pre>
 		[Authorize]
-        public IEnumerable<Object> Get()
+        public IEnumerable&lt;Object&gt; Get()
         {
             var owner = ObtainCurrentOwner();
             var assets = GetAssets(owner.Id);
@@ -50,12 +51,12 @@
 		
 		protected Owner ObtainCurrentOwner()
         {
-            return RavenSession.Query<Owner>().SingleOrDefault(x => x.UserName == HttpContext.Current.User.Identity.Name);
+            return RavenSession.Query&lt;Owner&gt;().SingleOrDefault(x =&gt; x.UserName == HttpContext.Current.User.Identity.Name);
         }
 		
-		public IEnumerable<Asset> GetAssets(int ownerID)
+		public IEnumerable&lt;Asset&gt; GetAssets(int ownerID)
         {
-            return RavenSession.Query<Asset>().Where(x => x.OwnerId == ownerID);
+            return RavenSession.Query&lt;Asset&gt;().Where(x =&gt; x.OwnerId == ownerID);
         }
 	</pre>
 	<p>This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting the current user and all it's assets is a metter of two linq queries using the <b>RavenSession.</b> which has to be opened before.</p>
@@ -129,49 +130,47 @@
 	<pre>
 	
 	</pre>
-	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. The parent layout is defined in <i>_Layout.cshtml<i> however the part mastered by Knockout is defined in the <i>Index.cshtml</i> file. The left side menu is composed of two smaller menus. One which contains the list of properties with the possibility to create new one and another one which allows to switch over details of the selected property. Here is the View representing the first menu:</p>
+	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. The parent layout is defined in <i>_Layout.cshtml</i> however the part mastered by Knockout is defined in the <i>Index.cshtml</i> file. The left side menu is composed of two smaller menus. One which contains the list of properties with the possibility to create new one and another one which allows to switch over details of the selected property. Here is the View representing the first menu:</p>
 	<pre>
-		<div class="well sidebar-nav">
-            <li class="nav-header">Property list:</li>
-            <ul class="nav nav-list" data-bind="foreach:assets">
-                <li><a data-bind="text:name,click:select" href="#"></a></li>
-            </ul>
-            <ul class="nav nav-list">
-                <li class="nav-header">Actions:</li>
-                <li><a href="#" data-bind="click: newAsset"><i class="icon-pencil"></i>@BasicResources.NewProperty</a></li>
-            </ul>
-        </div>
+		&lt;div class="well sidebar-nav"&gt;
+            &lt;li class="nav-header"&gt;Property list:&lt;/li&gt;
+            &lt;ul class="nav nav-list" data-bind="foreach:assets"&gt;
+                &lt;li&gt;&lt;a data-bind="text:name,click:select" href="#"&gt;&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+            &lt;ul class="nav nav-list"&gt;
+                &lt;li class="nav-header"&gt;Actions:&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#" data-bind="click: newAsset"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;@BasicResources.NewProperty&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
 	</pre>
 	<p><b>Foreach binding</b> was used in order to render all the appartments. For each appartment an anchor tag is emitted. The text of this tag is bound to the name of the appartment and the click actions is bound to the <i>select</i> function. The creation of new asset is handled by the <i>newAsset</i> function of the <i>OwnerViewModel</i>.</p>
 	<p>The second part of the menu is defined directly as html. Three anchor tags are render, each of them pointing to different tab, using the same url pattern. For example the URL "#/{property-name}/overview" should show the "Overview" tab of the property with given name. Client side routing is used, in order to execute certain actions depending on the accessed url. In order to enable client side rendering <b>Path.JS</b> library is used. The <b>attribute binding of knockout</b> is used to render the correct anchor tag.</p>
 	<pre>
-		<div class="well sidebar-nav" data-bind="with:selectedAsset">
-			<ul class="nav nav-list">
-				<li class="nav-header" data-bind="text:name"></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/overview'}"><i class="icon-pencil"></i>Overview</a></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/charges'}"><i class="icon-arrow-down"></i>Charges</a></li>
-				<li><a data-bind="attr: {href: '#/' + name() + '/rents'}"><i class="icon-arrow-up"></i>Rents</a></li>
-			</ul>
-		</div>
+		&lt;div class="well sidebar-nav" data-bind="with:selectedAsset"&gt;
+			&lt;ul class="nav nav-list"&gt;
+				&lt;li class="nav-header" data-bind="text:name"&gt;&lt;/li&gt;
+				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/overview'}"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;Overview&lt;/a&gt;&lt;/li&gt;
+				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/charges'}"&gt;&lt;i class="icon-arrow-down"&gt;&lt;/i&gt;Charges&lt;/a&gt;&lt;/li&gt;
+				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/rents'}"&gt;&lt;i class="icon-arrow-up"&gt;&lt;/i&gt;Rents&lt;/a&gt;&lt;/li&gt;
+			&lt;/ul&gt;
+		&lt;/div&gt;
 	</pre>
 	<p>You can also notice, that the <b>with binding</b> was used to set the current asset view model as the parent for the navigation div.</p>
 	<p>The right part simply contains all of the 3 tabs (overview, charges or rents), only one of them visible at time. In order to separate the content into multiple files, partial rendering of ASP.MVC is used.<p>
 	<pre>
-		&lt;div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}"&gt;
-			&lt;div class="span10"&gt;
-				&lt;div id="overview"&gt;
-					@Html.Partial("Overview")
-				&lt;/div&gt;
-				&lt;div id="charges"&gt;
-					@Html.Partial("Charges")
-				&lt;/div&gt;
-				&lt;div id="rents"&gt;
-					@Html.Partial("Rents")
-				&lt;/div&gt;
+		&lt;div id="assetDetail" class="span9" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}"&gt;
+			&lt;div id="overview"&gt;
+				@Html.Partial("Overview")
+			&lt;/div&gt;
+			&lt;div id="charges"&gt;
+				@Html.Partial("Charges")
+			&lt;/div&gt;
+			&lt;div id="rents"&gt;
+				@Html.Partial("Rents")
 			&lt;/div&gt;
 		&lt;/div&gt;
 	</pre>
-	<p>Again the <b>with binding</p> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
+	<p>Again the <b>with binding</b> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
 	<p>Now let's go back to the ViewModels. <b>ChargeViewModel</b> and <b>RentViewModel</b> have a same ancestor which is called <b>ObligationViewModel</b>. Since both rents and charges how some common properties such as the amount or the regularity, a common parent ViewModel is good place to define them.</p>
 	<p>The most interesting part of <i>ChargeViewModel</i> is the <i>save</i> function which uses JQuery to emit a HTTP request to the <i>ChargesController</i>. As previously described, two different operations are exposed with the same url, one for creation (HTTP PUT) another for update (HTTP POST). The ViewModel uses a <i>new</i> flag to distinguish these two cases. Before the request is executed, the ViewModel uses <a href="https://github.com/ericmbarnard/Knockout-Validation">Knockout.Validation</a> plugin to perform this check with the<i>errors</i> property.</p>
 	<pre>
@@ -220,5 +219,87 @@
     };
 	</pre>
 	<h3>Charges View</h3>
-	<p>The charges view takes 
+	<p>The charges view is quite classical master detail view. A table of charges is rendered using the foreach binding and then the currently selected charge is rendered in a side div tag using the with binding.</p>
+	<pre>
+	 &lt;div class="row-fluid"&gt;
+		&lt;table class="table table-bordered table-condensed"&gt;
+			&lt;tbody data-bind="foreach: charges"&gt;
+				&lt;tr style="cursor: pointer;" data-bind="click: select"&gt;
+					&lt;td style="vertical-align: middle"&gt;
+						&lt;div data-bind='text: name'&gt;&lt;/div&gt;
+					&lt;/td&gt;
+					&lt;td style="vertical-align: middle"&gt;
+						&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
+					&lt;/td&gt;
+					&lt;td style="vertical-align: middle"&gt;
+						&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
+					&lt;/td&gt;
+					&lt;td&gt;
+						&lt;button type="submit" class="btn" data-bind="visibility: !isNew(), click:remove"&gt;&lt;i class="icon-trash"&gt;&lt;/i&gt;&lt;/button&gt;
+					&lt;/td&gt;
+				&lt;/tr&gt;
+			&lt;/tbody&gt;
+		&lt;/table&gt;
+	&lt;/div&gt;
+	
+	
+	</pre>
+	<p>You can see, that the click action of the table row is bound the the <i>select</i> method of the <i>ChargeViewModel</i></p>
+	<h3>Using the KoExtensions</h3>
+	<p>As you can see there is a pie chart representing the charges repartition. This chart is rendered using D3JS, more specifically by a special binding of a small project of mine called KoExtensions. The rendering of the graph is really simple. The only thing to do is to use the <i>piechart</i> binding which is part of KoExtensions. This binding takes 3 parameters: the collection of the data to be rendered, transformation function to indicate which values inside the collection should be used to render the graph and the last but not least the initialization parameters.</p>
+	<pre>
+	&lt;div data-bind="piechart: charges, transformation:obligationToChart"&gt;&lt;/div&gt;
+	function obligationToChart(d) {
+		return { x: d.name(), y: d.amount() };
+	}
+	</pre>
+	<p>In order to render the graph, the KoExtensions binding needs to know which value in one concretion collection item specifies the with of each arc in the pie chart and which value is the title. Internally these values are simply <i>x</i> and <i>y</i>. The transformation function uses the <i>name</i> and the <i>amount</i> values of the charge. The initialization parameters of the chart are not set, so the default once are used.</p>
+	<h3>Bootstrap style date-time picker</h3>
+	<p>Bootstrap does not contain a date-time picker nor is it on their roadmap. Luckily the community came up with a solution. I have used the one called <a href="http://www.eyecon.ro/bootstrap-datepicker/">bootstrap-datepicker.js</a>. Since I needed to use it with Knockout, I have came up with another special binding which you can find in KoExtensions, it's usage is fairly simple.</p>
+	<pre>
+	&lt;div class="controls"&gt;
+		&lt;input type="text" data-bind="datepicker:end"&gt;
+	&lt;/div&gt;
+	</pre>
+	<h3>Binding to the map</h3>
+	<p>The last usage of KoExtensions is the rendering of the map containing all the assets in the left hand bar. I have created a binding which enables the rendering of one or more ViewModels on the map, by specifing which property contains the latitude and longitude values. Here the binding is used withing an foreach binding, in order to display all the appartments in the map.</i>
+	<pre>
+	&lt;div class="row-fluid"&gt;
+		&lt;div data-bind="foreach: assets"&gt;
+			&lt;div data-bind="latitude: lat, longitude:lng, map:map, selected:selected"&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div id="map" style="width: 100%; height: 300px"&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	</pre>
+	<p>The map has to be initialized the usual way as described in the official google maps tutorial, the binding does not take care of this. This enables the developer to define the map exactly the way he likes. Any other elements can be rendered on the same map, simply by passing the same map object to other bindings. The selected property which is passed in the binding tells the binding which variable it should update or which function to call when one element is selected in the map.</p>
+	<h3>Knockout Validation and Bootstrap styles</h3>
+	<p>One of the Knockout's feature which make it a really great tool, is the styles binding, providing you with the ability to associate one concrete css style to an UI component, if some condition in the ViewModel was met. One of the typical examples is giving the selected row in a table a highlight.</p>
+	<pre>
+	<tr style="cursor: pointer;" data-bind="css : {info:selected},click: select">...</tr>
+	</pre>
+	<p>Bootstrap provides styles for highlighting UI components. <a href="">Knockout-Validation</a> is a great plugin which extends any observable value with <i>isValid</i> property, and enables the developer to define rules which will determine the value of this property.</p>
+	<pre>
+	self.amount = ko.observable().extend({ required: true, number: true });
+	self.name = ko.observable().extend({ required: true });
+	
+	&lt;div class="control-group" data-bind="css : {error:!name.isValid()}"&gt;
+		&lt;label class="control-label"&gt;Name&lt;/label&gt;
+		&lt;div class="controls"&gt;
+			&lt;input type="text" placeholder="@BasicResources.Name" data-bind="value:name"&gt;
+			&lt;span class="help-inline" data-bind="validationMessage: name"&gt;&lt;/span&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	&lt;div class="control-group" data-bind="css : {error:!amount.isValid()}"&gt;
+		&lt;label class="control-label"&gt;@BasicResources.Amount&lt;/label&gt;
+		&lt;div class="controls"&gt;
+			&lt;input type="text" placeholder="@BasicResources.Amount" data-bind="value: amount"&gt;
+			&lt;span class="help-inline" data-bind="validationMessage: amount"&gt;&lt;/span&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+	</pre>
+	<img href="">
+	</img>
+	<p>By combining these Bootstrap with Knockout-Validation, we can achieve a very nice effect of highlighting when the value is invalid</p>
 </html>

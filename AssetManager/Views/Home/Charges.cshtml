@@ -16,7 +16,7 @@
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: charges">
-                    <tr style="cursor: pointer;" data-bind="click: select">
+                    <tr style="cursor: pointer;" data-bind="css : {info:selected},click: select">
                         <td style="vertical-align: middle">
                             <div data-bind='text: name'></div>
                         </td>
@@ -79,6 +79,20 @@
                     <label class="control-label">@BasicResources.Counterparty</label>
                     <div class="controls">
                         <input type="text" placeholder="@BasicResources.Counterparty" data-bind="value: counterparty">
+                    </div>
+                </div>
+
+                 <div class="control-group">
+                    <label class="control-label">@BasicResources.Start</label>
+                    <div class="controls">
+                        <input type="text" data-bind="datepicker:start" id="rentStartDate">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">@BasicResources.End</label>
+                    <div class="controls">
+                        <input type="text" data-bind="datepicker:end" id="rentEndDate">
                     </div>
                 </div>
 

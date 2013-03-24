@@ -3,10 +3,7 @@
     $.extend(self, new BaseViewModel());
     self.type = "";
     self.parent = null;
-    self.calendars = [];
     self.name = ko.observable().extend({ required: true });
-    self.sCalendar = ko.observableArray([]);
-    self.sAllPayments = ko.observableArray([]);
     self.paymentDay = ko.observable().extend({ number: true, min: 1});//, max: 31 });
     self.unit = ko.observable().extend({ number: true, min: 1});//, max: 12 });
     self.amount = ko.observable().extend({ required: true, number: true });

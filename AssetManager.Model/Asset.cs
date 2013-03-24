@@ -20,6 +20,8 @@ namespace AssetManager.Model
         public String City { get; set; }
         public String Country { get; set; }
         public String ZipCode {get;set;}
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public double InitialCosts { get; set; }
         public List<Rent> Rents { get; set; }
         public List<Charge> Charges { get; set; }

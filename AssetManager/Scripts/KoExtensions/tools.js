@@ -7,13 +7,17 @@ function isEmpty(str) {
     return (!str || 0 === str.length);
 }
 
-function sum(kArray, func) {
+
+/* Sums all elements in the array. The map function is applied on each element to obtain it's value. The predicate is a condition to be added to the sum*/
+function sum(kArray, mapfunc,predicate) {
     var total = 0;
     for (var p = 0; p < kArray.length; p++) {
-		if(func!=null)
-			total += parseFloat(func(kArray[p]));
-		else
-    	    total += parseFloat(kArray[p]);
+        if(predicate==null || predicate(kArray[p])){
+            if (mapfunc != null)
+                total += parseFloat(mapfunc(kArray[p]));
+            else
+                total += parseFloat(kArray[p]);
+        }
     }
     return total;
 }
@@ -52,12 +56,18 @@ function toFixed(v,n){
     return v.toFixed(n);
 }
 
+function isDate(d) {
+    return Object.prototype.toString.call(d) == "[object Date]";
+}
+
+//verify that the date is valid => object is date-time and there is a meaningful value
 function isValidDate(d) {
-  if ( Object.prototype.toString.call(d) !== "[object Date]" )
+  if (!isDate(d))
     return false;
   return !isNaN(d.getTime());
 }
 
+//not efficient comparison of arrays
 function arraysAreEqual(ary1, ary2) {
     if (ary1 != null && ary2 != null)
         return (ary1.join('') == ary2.join(''));

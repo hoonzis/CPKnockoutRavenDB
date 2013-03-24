@@ -3,7 +3,7 @@
 ko.bindingHandlers.map = {
     init: function (element, valueAccessor, allBindingsAccessor, viewModel) {
 
-        //try {
+        try {
             var position = new google.maps.LatLng(allBindingsAccessor().latitude(), allBindingsAccessor().longitude());
 
             var marker = new google.maps.Marker({
@@ -20,8 +20,8 @@ ko.bindingHandlers.map = {
             viewModel._mapMarker = marker;
 
             allBindingsAccessor().map.setCenter(position);
-        //}
-        //catch (err) { }
+        }
+        catch (err) { }
     },
     update: function (element, valueAccessor, allBindingsAccessor, viewModel) {
         //try{
@@ -49,11 +49,18 @@ ko.bindingHandlers.datepicker = {
         var widget = $(element).data("datepicker");
          //when the view model is updated, update the widget
         if (widget) {
-			var vmValue = ko.utils.unwrapObservable(valueAccessor());
-			if(!isValidDate(vmValue))
-				return;
-				
-			widget.setValue(vmValue);
+            var vmValue = ko.utils.unwrapObservable(valueAccessor());
+
+            //if we have a string value - convert it first
+            if (isString(vmValue)) {
+                vmValue = new Date(vmValue);
+            }
+
+            //if the date is not valid - don't visualize it, or we would have a "NaN/NaN/NaN"
+            if (!isValidDate(vmValue))
+                return;
+
+            widget.setValue(vmValue);
         }
     }
 };
@@ -76,15 +83,15 @@ function setDefaultOptions(options) {
 ko.bindingHandlers.piechart = {
     init: function(element, valueAccessor, allBindingsAccessor) {
       //initialize datepicker with some optional options
-	  var transf = allBindingsAccessor().transformation;
-	  var vmData = allBindingsAccessor().piechart();
+      var transf = allBindingsAccessor().transformation;
+      var vmData = allBindingsAccessor().piechart();
 
-	  var options  = setDefaultOptions(allBindingsAccessor().chartOptions);
-	  var data = vmData.map(transf);
-	  vmData._originalData = data;
-	  vmData._options = options;
-	  
-	  d3pieChart(options.width,options.height,data, element.id, options.legend);
+      var options  = setDefaultOptions(allBindingsAccessor().chartOptions);
+      var data = vmData.map(transf);
+      vmData._originalData = data;
+      vmData._options = options;
+      
+      d3pieChart(options.width,options.height,data, element.id, options.legend);
     },
     update: function(element, valueAccessor,allBindingsAccessor) {
       var transf = allBindingsAccessor().transformation;
@@ -92,13 +99,13 @@ ko.bindingHandlers.piechart = {
 
       var options = setDefaultOptions(vmData._options);
       
-	  var data = vmData.map(transf);
-	  
-	  if(!arraysAreEqual(data, vmData._originalData)){
-	      element.innerHTML = "";
-		d3pieChart(options.width,options.height,data, element.id, options.legend);
-		vmData._originalData = data;
-	  }
+      var data = vmData.map(transf);
+      
+      if(!arraysAreEqual(data, vmData._originalData)){
+          element.innerHTML = "";
+        d3pieChart(options.width,options.height,data, element.id, options.legend);
+        vmData._originalData = data;
+      }
     }
 };
 

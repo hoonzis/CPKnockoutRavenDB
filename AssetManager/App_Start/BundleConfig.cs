@@ -12,7 +12,8 @@ namespace AssetManager
                 .Include("~/Scripts/path.min.js")
                 .Include("~/Scripts/bootstrap.min.js")
                 .Include("~/Scripts/knockout-2.2.1.js")
-                .Include("~/Scripts/knockout.validation.js"));
+                .Include("~/Scripts/knockout.validation.js")
+                .Include("~/Scripts/bootstrap-datepicker.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/vms").IncludeDirectory("~/ViewModels/", "*.js"));
             

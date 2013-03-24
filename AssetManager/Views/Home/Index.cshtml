@@ -1,4 +1,5 @@
 ﻿@using BasicResources = AssetManager.Resources.BasicResources
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
 <script type="text/javascript">
     var requestedAsset;
     var requestedTab;
@@ -31,6 +32,18 @@
 
     }
 
+    function initializeMap() {
+        try {
+            var myOptions = {
+                zoom: 8,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById("map"), myOptions);
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     function showTab(as, id) {
         if (owner.assets() == null || owner.assets().length == 0)
             return;
@@ -57,6 +70,7 @@
 
     $(document).ready(function () {
         initURLs();
+        initializeMap();
         ko.validation.configure({
             registerExtenders: true,
             messagesOnModified: true,
@@ -73,7 +87,7 @@
 </script>
 
 <div class="row-fluid">
-    <div class="span2">
+    <div class="span3">
         <div class="well sidebar-nav">
             <li class="nav-header">Property list:</li>
             <ul class="nav nav-list" data-bind="foreach:assets">
@@ -95,19 +109,27 @@
                 </ul>
             </div>
         </div>
-    </div>
 
-    <div id="assetDetail" class="span10" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}">
-        <div class="span10">
-            <div id="overview">
-                @Html.Partial("Overview")
+        <div class="row-fluid">
+            <div data-bind="foreach: assets">
+                <div data-bind="latitude: lat, longitude:lng, map:map, selected:selected">
+                </div>
             </div>
-            <div id="charges">
-                @Html.Partial("Charges")
-            </div>
-            <div id="rents">
-                @Html.Partial("Rents")
+            <div id="map" style="width: 100%; height: 300px">
             </div>
         </div>
+    </div>
+
+    <div id="assetDetail" class="span9" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}">
+        <div id="overview">
+            @Html.Partial("Overview")
+        </div>
+        <div id="charges">
+            @Html.Partial("Charges")
+        </div>
+        <div id="rents">
+            @Html.Partial("Rents")
+        </div>
+
     </div>
 </div>

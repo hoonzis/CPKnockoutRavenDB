@@ -54,7 +54,9 @@ namespace AssetManager.Controllers
             asset.Country = value.Country;
             asset.IncomeTax = value.IncomeTax;
             asset.InterestRate = value.InterestRate;
-            
+            asset.Latitude = value.Latitude;
+            asset.Longitude = value.Longitude;
+
             return GetReturnSaveReturnDto(asset);
         }
 
