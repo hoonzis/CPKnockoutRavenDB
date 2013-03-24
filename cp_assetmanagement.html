@@ -2,32 +2,83 @@
 <html lang="en"><head>
     <title>AssetManagement: manage your properties with RavenDB + WebAPI and KnockoutJS and more</title></head>
 	<body>
-	<p>Everyone renting an appartment or any other property knows that it might be quite difficult to track the depenses and income in order to assure himself of the rentability of the given property. I have created an applications which helps with just that and thanks to this applications I was able to play with the following technologies:</p>
+	<p>While learning a new technology or framework, I always like to build small but well covering Proof Of Concept application. It is even better if one can combine several new technologies into such a project. This is description of one such project which uses RavenDB, WebAPI, KnockoutJS, Bootstrap, D3JS.</p>
+	<p><b><a href="https://github.com/hoonzis/CPKnockoutRavenDB">Source code is available on GitHub</a></b></p>
+	<h2>The Use Case</h2>
+	<p>Everyone renting an appartment or any other property knows that it might be quite difficult to track the depenses and income in order to assure himself of the rentability of the given property. I have created an applications which helps with just that and thanks to this applications I was able the mentioned technologies. Now let's take a look at them closer.</p>
 	<ul>
-		<li>RavenDB - to stored the data. RavenDB is a document database, which seamlessly integrates into any C# project.</li>
-		<li>WebAPI - to serve the data through REST services. WebAPI is a quite new technology from MS which is ment to provide better support for building REST services. Ofcourse we have build REST services with WCF before, so the questions is why should we change to WebAPI? WCF was created in the age of WSDL. It was adapted later to generate JSON, however inside it still uses XML as data transformation format. WebAPI is complete rewrite which also provides other interesting features.</li>
-		<li>KnockoutJS - to glue the interaction on the client side. Knockout is one of the cool JavaScript MV* frameworks which provide a way to organise and facilitate the JavaScript developement. Unlike other frameworks (Backbone or Ember) KnockoutJS concentrate itself on binding of the data and actions between the GUI (HTML) and the ViewModel (JavaScript).</li>
-		<li>Bootstrap - to give it a decent GUI. As its name says, bootstrap enables a quick developement of a web application's GUI. It is a greate tool to all of us who just want to get the project out and we still need a decent user interface.</li>
-		<li>D3JS - to visualize data using charts. D3JS is a JavaScript libraty enabling the user to manipulate the DOM.</li>
+		<li><b><a href="http://ravendb.net/">RavenDB</a></b> - to stored the data. RavenDB is a document database, which seamlessly integrates into any C# project.</li>
+		<li><b><a href="http://www.asp.net/web-api">WebAPI</a></b> - to serve the data through REST services. WebAPI is a quite new technology from MS which is ment to provide better support for building REST services. Ofcourse we have built REST services with WCF before, so the questions is why should we change to WebAPI? WCF was created in the age of WSDL. It was adapted later to generate JSON, however inside it still uses XML as data transformation format. WebAPI is complete rewrite which also provides other interesting features.</li>
+		<li><b><a href="http://knockoutjs.com/">KnockoutJS</a></b> - to glue the interaction on the client side. Knockout is one of the cool JavaScript MV(*) frameworks which provide a way to organise and facilitate the JavaScript developement. Unlike other frameworks (Backbone or Ember) KnockoutJS concentrate itself on binding of the data and actions between the GUI (HTML) and the ViewModel (JavaScript).</li>
+		<li><b><a href="http://twitter.github.com/bootstrap/">Bootstrap</a></b> - to give it a decent GUI. As its name says, bootstrap enables a quick developement of a web application's GUI. It is a greate tool to all of us who just want to get the project out and we still need a decent user interface.</li>
+		<li><b><a href="http://d3js.org/">D3.js</a></b> - to visualize data using charts. D3JS is a JavaScript libraty enabling the user to manipulate the DOM.</li>
+		<li><b><a href="https://github.com/hoonzis/KoExtensions">KoExtensions</a></b> - very set of tools which I have created, allowing easy creation of pie charts or binding to google maps while using KnockoutJS.
 	</ul>
-	<p>Here is how it looks like at the end</p>
-	<img style="width:600px" src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/all.PNG">
+	<p>Here is how it looks like at the end:</p>
+	<img style="width:600px" src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/all.PNG"/>
 	<h2>The architecture of the application</h2>
 	<p>The architecture is visualized in the following diagram. The backend is composed of MVC application, which exposes several API controllers. These controllers talk directly to the database throught RavenDB IDocumentSession interface. The REST services are invoked by ViewModel code written in JavaScript. The content of the ViewModels is bound the view using Knockout.</p>
-	
+	<img style="width:500px" src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/architecture.png"/>
 	<p>This application is as lightweight as possible. It is composed of a MVC 4 application with two types of Controllers: Standard and API. Standard controllers are the ones which are used to render the base web pages. Event though that this applications uses client side MVVM, it has to be hosted. I have chosed to host the applications inside the classic ASP.MVC application. It is not a sin to mix server and client side MVC in one application.</p>
 	
 	<p>This application has no service layer. All the logic can be found inside the Controllers. The controllers all use directly the <b>IDocumentSession</b> of RavenDB to access the database. The good approach to user RavenDB when using ASP.MVC is described on the official web page. Basically the RavenDB session is openned when the controllers action is started and is closed when the action terminates. The structure of API controller however differs a little bit, but the principle is the same.</p>
 	
-	<h3>When to use Knockout</h3>
-	<p>There are probably a lot of people around there with exactly the same question. It basically comes to the answer of whether to use or not any client side MVC JavaScript framework. From my purely personal point of view this makes sence when one or more of these conditions are filled:
+	<h2>When to use Knockout</h2>
+	<p>There are probably a lot of people around there with exactly the same question. It basically comes to the answer of whether to use or not any client side MVC JavaScript framework. From my purely personal point of view this makes sence when one or more of these conditions are met:
 	<ul><li>You have a good server side REST API (or you plan to build one) and wan't to use it to build a web page.</li>
-	<li>You are building more an web-application then a website. That is to say, your users will stay at the page for some time, perform multiple actions and you need a responsive application for that.</li>
+	<li>You are building more an web-application then a website. That is to say, your users will stay at the page for some time, perform multiple actions, keep some user state and you need a responsive application for that.</li>
 	<li>You need a really dynamic page. Even if you would use server side MVC than you would somehow need to include a lot of JavaScript for the dynamics of the page.</li></ul>
+	<p>This is just my personal opinion and there is a lot of discussion around internet and as usually no silver-bullet answer.</p>
 	</body>
 	<h2>Data model</h2>
 	<p>RavenDB is NoSQL database, or as it would be better to say non-relational database. The data is stored in document collections, serialized to JSON. Each document contains an object or more specifically graph of objects serialized to JSON. When working with relational databases, the aggregated graph of objects which is served to the user is usually constructed by several joins into several tables. When working with document databases, the data which is aggregated into one object graph, should be also stored that way. In our particular example, on property or asset can have several rents and several charges. One rent does not really have sense without the asset to which it is attached. This applications is composed of two collections: Owners and Assets. Here are examples of Owner and Asset document.</p>
 	<pre>
+	{
+	  "Name": null,
+	  "UserName": "test",	  
+	  "Password": "test"
+	}
+	</pre>
+	<pre>
+	{
+	  "OwnerId": 1,
+	  "LastChargeId": 5,
+	  "LastRentId": 0,
+	  "Name": "Appartment #1",
+	  "Address": "5th Ave",
+	  "City": "New York",
+	  "Country": "USA",
+	  "ZipCode": "10021",
+	  "Latitude": 40.774,
+	  "Longitude": -73.965,
+	  "InitialCosts": 0.0,
+	  "Rents": [],
+	  "Charges": [
+		{
+		  "Counterparty": "New York Electrics",
+		  "Type": null,
+		  "Automatic": false,
+		  "Regularity": "MONTH",
+		  "Id": 2,
+		  "Name": "Electricity",
+		  "PaymentDay": 4,
+		  "AccountNumber": "9084938890-2491",
+		  "Amount": 1000.0,
+		  "Unit": 3,
+		  "Notes": "",
+		  "End": "2013-03-19T23:00:00.0000000Z",
+		  "Start": "2013-03-10T23:00:00.0000000Z",
+		},
+		{ ... },
+		{ ... }
+	  ],
+	  "Ebit": 0.0,
+	  "Size": 80.0,
+	  "PMS": 1250000.0,
+	  "Price": 100000000.0,
+	  "IncomeTax": 0.0,
+	  "InterestRate": 0.0
+	}
 	</pre>
 	<p>One question you might be asking yourself is why did I not use only one collection of Owners. Each <i>Owner</i> document would than contain all the assets as an inner collection. This is just because, I thought it might make sense in the future, two have an asset shared by two owners. The current design allows us anyway in the future, connect the asset to an collection of Owners, simply by replacing <i>OwnerID</i> property with and collection of integers, containing all the ids of the owners.</p>
 	<h2>The Backend</h2>
@@ -131,6 +182,8 @@
 	
 	</pre>
 	<p>Before detailing the last missing ViewModels (Rents and Charges), let's take a look at the first part of the View. The parent layout is defined in <i>_Layout.cshtml</i> however the part mastered by Knockout is defined in the <i>Index.cshtml</i> file. The left side menu is composed of two smaller menus. One which contains the list of properties with the possibility to create new one and another one which allows to switch over details of the selected property. Here is the View representing the first menu:</p>
+	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/left_panel.PNG"/>
+	
 	<pre>
 		&lt;div class="well sidebar-nav"&gt;
             &lt;li class="nav-header"&gt;Property list:&lt;/li&gt;
@@ -241,12 +294,11 @@
 			&lt;/tbody&gt;
 		&lt;/table&gt;
 	&lt;/div&gt;
-	
-	
 	</pre>
 	<p>You can see, that the click action of the table row is bound the the <i>select</i> method of the <i>ChargeViewModel</i></p>
 	<h3>Using the KoExtensions</h3>
 	<p>As you can see there is a pie chart representing the charges repartition. This chart is rendered using D3JS, more specifically by a special binding of a small project of mine called KoExtensions. The rendering of the graph is really simple. The only thing to do is to use the <i>piechart</i> binding which is part of KoExtensions. This binding takes 3 parameters: the collection of the data to be rendered, transformation function to indicate which values inside the collection should be used to render the graph and the last but not least the initialization parameters.</p>
+	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/pie_chart.PNG"/>
 	<pre>
 	&lt;div data-bind="piechart: charges, transformation:obligationToChart"&gt;&lt;/div&gt;
 	function obligationToChart(d) {
@@ -261,6 +313,7 @@
 		&lt;input type="text" data-bind="datepicker:end"&gt;
 	&lt;/div&gt;
 	</pre>
+	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/datepicker.PNG"/>
 	<h3>Binding to the map</h3>
 	<p>The last usage of KoExtensions is the rendering of the map containing all the assets in the left hand bar. I have created a binding which enables the rendering of one or more ViewModels on the map, by specifing which property contains the latitude and longitude values. Here the binding is used withing an foreach binding, in order to display all the appartments in the map.</i>
 	<pre>
@@ -277,8 +330,9 @@
 	<h3>Knockout Validation and Bootstrap styles</h3>
 	<p>One of the Knockout's feature which make it a really great tool, is the styles binding, providing you with the ability to associate one concrete css style to an UI component, if some condition in the ViewModel was met. One of the typical examples is giving the selected row in a table a highlight.</p>
 	<pre>
-	<tr style="cursor: pointer;" data-bind="css : {info:selected},click: select">...</tr>
+	&lt;tr style="cursor: pointer;" data-bind="css : {info:selected},click: select"&gt;...&lt;/tr&gt;
 	</pre>
+	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/charges_table.PNG"/>
 	<p>Bootstrap provides styles for highlighting UI components. <a href="">Knockout-Validation</a> is a great plugin which extends any observable value with <i>isValid</i> property, and enables the developer to define rules which will determine the value of this property.</p>
 	<pre>
 	self.amount = ko.observable().extend({ required: true, number: true });
@@ -299,7 +353,10 @@
 		&lt;/div&gt;
 	&lt;/div&gt;
 	</pre>
-	<img href="img/">
-	</img>
+	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/validation.PNG"></img>
 	<p>By combining these Bootstrap with Knockout-Validation, we can achieve a very nice effect of highlighting when the value is invalid</p>
+	<h2>What is not described in this article</h2>
+	<p>I did not describe every line of code, but since the project is available at my Github account, you can easily examine it. There are interesting parts at which you might take a look at: JavaScript unit tests, integration test for WebAPI Controller, bundles to regroup  and minimize several JS files. Also please not, that the code is not perfect I have used it to play around, not to create a production ready application.</p>
+	<h2>Summary</h2>
+	<p>That's about all. I think that the frameworks which I have used are all great at what they do. RavenDB in a .NET project is extremely not-present. You don't even have to think about your data storage layer. I know that this DB has much more to offer, but I did not dig to it enough to be able to talk about performance or optimization it provides, but I will definitely check it out later. KnockoutJS is great at UI data binding. It does not pretend to do more but it does that perfectly. There is not a better tool to declaratively define UI and comportement. D3.js even though I did not use it a lot is very powerfull. Can visualize any data any way you want. The only minus might be it's size. And bootstrap is finally a tool which enables us to get out <i>usable</i> UI in <i>reasonable</i> time, without having a designer at our side. This was not really possible before.</p>
 </html>

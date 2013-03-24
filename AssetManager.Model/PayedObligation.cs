@@ -18,15 +18,7 @@ namespace AssetManager.Model
 
         public PayedObligation()
         {
-            Payments = new List<Payment>();
-        }
-        public int LastPaymentId { get; set; }
-        
-        public List<Payment> Payments { get; set; }
-
-        public int GeneratePaymentId()
-        {
-            return ++LastPaymentId;
+            
         }
     }
 }

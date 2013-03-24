@@ -58,7 +58,6 @@ namespace AssetManager.Tests.Controllers
             Assert.AreEqual(charge.Name, "Name");
             Assert.AreEqual(charge.Notes, "Notes");
             Assert.AreEqual(charge.PaymentDay, 1);
-            Assert.AreEqual(charge.Payments.Count(), 0);
             Assert.AreEqual(charge.Unit, 2);
             Assert.AreEqual(charge.Amount, 500);
         }
