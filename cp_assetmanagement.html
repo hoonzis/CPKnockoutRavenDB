@@ -40,45 +40,45 @@
 	}
 	</pre>
 	<pre>
+{
+  "OwnerId": 1,
+  "LastChargeId": 5,
+  "LastRentId": 0,
+  "Name": "Appartment #1",
+  "Address": "5th Ave",
+  "City": "New York",
+  "Country": "USA",
+  "ZipCode": "10021",
+  "Latitude": 40.774,
+  "Longitude": -73.965,
+  "InitialCosts": 0.0,
+  "Rents": [],
+  "Charges": [
 	{
-	  "OwnerId": 1,
-	  "LastChargeId": 5,
-	  "LastRentId": 0,
-	  "Name": "Appartment #1",
-	  "Address": "5th Ave",
-	  "City": "New York",
-	  "Country": "USA",
-	  "ZipCode": "10021",
-	  "Latitude": 40.774,
-	  "Longitude": -73.965,
-	  "InitialCosts": 0.0,
-	  "Rents": [],
-	  "Charges": [
-		{
-		  "Counterparty": "New York Electrics",
-		  "Type": null,
-		  "Automatic": false,
-		  "Regularity": "MONTH",
-		  "Id": 2,
-		  "Name": "Electricity",
-		  "PaymentDay": 4,
-		  "AccountNumber": "9084938890-2491",
-		  "Amount": 1000.0,
-		  "Unit": 3,
-		  "Notes": "",
-		  "End": "2013-03-19T23:00:00.0000000Z",
-		  "Start": "2013-03-10T23:00:00.0000000Z",
-		},
-		{ ... },
-		{ ... }
-	  ],
-	  "Ebit": 0.0,
-	  "Size": 80.0,
-	  "PMS": 1250000.0,
-	  "Price": 100000000.0,
-	  "IncomeTax": 0.0,
-	  "InterestRate": 0.0
-	}
+	  "Counterparty": "New York Electrics",
+	  "Type": null,
+	  "Automatic": false,
+	  "Regularity": "MONTH",
+	  "Id": 2,
+	  "Name": "Electricity",
+	  "PaymentDay": 4,
+	  "AccountNumber": "9084938890-2491",
+	  "Amount": 1000.0,
+	  "Unit": 3,
+	  "Notes": "",
+	  "End": "2013-03-19T23:00:00.0000000Z",
+	  "Start": "2013-03-10T23:00:00.0000000Z",
+	},
+	{ ... },
+	{ ... }
+  ],
+  "Ebit": 0.0,
+  "Size": 80.0,
+  "PMS": 1250000.0,
+  "Price": 100000000.0,
+  "IncomeTax": 0.0,
+  "InterestRate": 0.0
+}
 	</pre>
 	<p>One question you might be asking yourself is why did I not use only one collection of Owners. Each <i>Owner</i> document would than contain all the assets as an inner collection. This is just because, I thought it might make sense in the future, two have an asset shared by two owners. The current design allows us anyway in the future, connect the asset to an collection of Owners, simply by replacing <i>OwnerID</i> property with and collection of integers, containing all the ids of the owners.</p>
 	<h2>The Backend</h2>
@@ -92,89 +92,90 @@
 	<h3>Getting all the assets</h3>
 	<p>Without further information let's take a look at the first Controller which returns all the "properties" of the logged owner. This service is available at <i>api/assets</i>.</p>
 	<pre>
-		[Authorize]
-        public IEnumerable&lt;Object&gt; Get()
-        {
-            var owner = ObtainCurrentOwner();
-            var assets = GetAssets(owner.Id);
-            return result;
-        }
-		
-		protected Owner ObtainCurrentOwner()
-        {
-            return RavenSession.Query&lt;Owner&gt;().SingleOrDefault(x =&gt; x.UserName == HttpContext.Current.User.Identity.Name);
-        }
-		
-		public IEnumerable&lt;Asset&gt; GetAssets(int ownerID)
-        {
-            return RavenSession.Query&lt;Asset&gt;().Where(x =&gt; x.OwnerId == ownerID);
-        }
+[Authorize]
+public IEnumerable&lt;Object&gt; Get()
+{
+	var owner = ObtainCurrentOwner();
+	var assets = GetAssets(owner.Id);
+	return result;
+}
+
+protected Owner ObtainCurrentOwner()
+{
+	return RavenSession.Query&lt;Owner&gt;().SingleOrDefault(x =&gt; x.UserName == HttpContext.Current.User.Identity.Name);
+}
+
+public IEnumerable&lt;Asset&gt; GetAssets(int ownerID)
+{
+	return RavenSession.Query&lt;Asset&gt;().Where(x =&gt; x.OwnerId == ownerID);
+}
 	</pre>
 	<p>This method is decorated with the <b>[Authorize]</b> attribute. This mechanism was known previosly in WCF. ASP.NET checks for the cookie within this request and if no cookie is present the request is rejected. Getting the current user and all it's assets is a metter of two linq queries using the <b>RavenSession.</b> which has to be opened before.</p>
 	<h3>Opening RavenDB session</h3>
 	<p>All the controllers inherit from a base controller called <i>RavenApiController</i>. This controller opens the session to RavenDB when it is initialized and than potentially saves the changes to the database when the work is finished. The <i>dispose</i> method of the controller is the last method which is invoked when the work is over.</p>
 	<pre>
-	protected override void Initialize(System.Web.Http.Controllers.HttpControllerContext controllerContext)
+protected override void Initialize(System.Web.Http.Controllers.HttpControllerContext controllerContext)
+{
+	base.Initialize(controllerContext);
+	if(RavenSession == null)
+		RavenSession = WebApiApplication.Store.OpenSession();
+}
+
+protected override void Dispose(bool disposing)
+{
+	base.Dispose(disposing);
+	using (RavenSession)
 	{
-		base.Initialize(controllerContext);
-		if(RavenSession == null)
-			RavenSession = WebApiApplication.Store.OpenSession();
+		if (RavenSession != null)
+			RavenSession.SaveChanges();
 	}
-	
-	protected override void Dispose(bool disposing)
-	{
-		base.Dispose(disposing);
-		using (RavenSession)
-		{
-			if (RavenSession != null)
-				RavenSession.SaveChanges();
-		}
-	}
+}
 	</pre>
 	<p></p>
 	<h3>Adding new Charge</h3>
 	<p>This controller has two parametes. The charge object which is passed in as JSON object and the <i>assetID</i> which is specified as URL parameter. Since RavenDB provides changes tracking, there is no need to perform additional work. RavenDB will notice, that new charge was added to the <i>Charges</i> collection and when <i>SaveChanges</i> function is invoked on the Raven session, the new charge will be persisted to the database. As it has been explained before, the <i>SaveChanges</i> is invoked while disposing the controller.</p>
 	<pre>
-		public Object Post(Charge value, int assetID)
-		{
-			var owner = ObtainCurrentOwner();
-			var asset = GetAsset(assetID,owner);
-			value.Id = asset.GenerateChargeId();
-			
-			if (asset.Charges == null)
-			{
-				asset.Charges = new List&lt;Charge&gt;();
-			}
+public Object Post(Charge value, int assetID)
+{
+	var owner = ObtainCurrentOwner();
+	var asset = GetAsset(assetID,owner);
+	value.Id = asset.GenerateChargeId();
+	
+	if (asset.Charges == null)
+	{
+		asset.Charges = new List&lt;Charge&gt;();
+	}
 
-			asset.Charges.Add(value);
-			return GetResponse(value, asset, true);
-		}
+	asset.Charges.Add(value);
+	return GetResponse(value, asset, true);
+}
 	</pre>
 	<p>Note that if you want to acceess the <i>Charge</i> object in the future, you need to give it and ID. RavenDB does generated ID's only for documents, but not for any inner objects. The solution here is to give each Asset and id counter for the charges.
 	<h2>The FrontEnd</h2>
 	<p>All the logic on the client side resides in ViewModel classes. I assume you are familiar with MVVM pattern. If not you can still continue reading, while the understanding should be intuitive if you have worked with MVC frameworks before. The parent ViewModel and the one which aggregates others is the <b>OwnerViewModel</b>. The ViewModels build a hierarchy similary as the domain objects.</p>
 	<p>The OwnerViewModel has to get all the assets and build an <b>AssetViewModel</b> arround each recieved Asset. The data is retrived from the server as JSON using asynchronous request.</p>
 	<pre>
-	function OwnerViewModel() {
-		var self = this;
-		$.extend(self, new BaseViewModel());
-		self.assets = ko.observableArray([]);
-		self.selectedAsset = ko.observable([]);
-		self.isBusy(true);
-		self.message('Loading');
+function OwnerViewModel() {
+	var self = this;
+	$.extend(self, new BaseViewModel());
+	self.assets = ko.observableArray([]);
+	self.selectedAsset = ko.observable([]);
+	self.isBusy(true);
+	self.message('Loading');
 
-		$.ajax("/../api/assets", {
-			type: "get", contentType: "application/json",
-			statusCode: {
-				401: function () { window.location = "/en/Account/LogOn" }
-			},
-			success: function (data) {
-				var mappedAssets = $.map(data, function (item) {
-					return new AssetViewModel(self, item);
-				});
-				self.assets(mappedAssets);
-			}
-		});
+	$.ajax("/../api/assets", {
+		type: "get", contentType: "application/json",
+		statusCode: {
+			401: function () { window.location = "/en/Account/LogOn" }
+		},
+		success: function (data) {
+			var mappedAssets = $.map(data, function (item) {
+				return new AssetViewModel(self, item);
+			});
+			self.assets(mappedAssets);
+		}
+	});
+}
 	</pre>
 	<p>You can notice that this ViewModel calls jQuery's <b>$.extend</b> method right at the begining of the function. This is one of the ways to express inheritance in JavaScript. JavaScript is prototype based language. The objects derive directly from other objects, not from classes. The extend method basically copies all properties from the object specified in the parameter. All of my <i>ViewModels</i> have certain common properties such as <i>busy</i> or <i>message</i>. These are some help variables which I use on all ViewModels to visualize progress or show some info messages. Notice also the <i>selectedAsset</i> property, which holds the currently selected AsseetViewModel (imagine user selecting one line in the table of assets).</p>
 	<p>Wihtout further examination let's take a look at the <b>AssetViewModel</b>. There are several self-epxlanatory properties such as <i>address</i>, <i>price</i> and similar. What is more interesting are the arrays of <i>Rents</i> and <i>Charges</i>. These are observable arrays of ViewModels which are filled during the construction of the AssetViewModel object. The data to this object is passed from the <i>OwnerViewModel</i>. The asset also holds its value to the owner in the <i>parent</i> property.</p>
@@ -185,146 +186,146 @@
 	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/left_panel.PNG"/>
 	
 	<pre>
-		&lt;div class="well sidebar-nav"&gt;
-            &lt;li class="nav-header"&gt;Property list:&lt;/li&gt;
-            &lt;ul class="nav nav-list" data-bind="foreach:assets"&gt;
-                &lt;li&gt;&lt;a data-bind="text:name,click:select" href="#"&gt;&lt;/a&gt;&lt;/li&gt;
-            &lt;/ul&gt;
-            &lt;ul class="nav nav-list"&gt;
-                &lt;li class="nav-header"&gt;Actions:&lt;/li&gt;
-                &lt;li&gt;&lt;a href="#" data-bind="click: newAsset"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;@BasicResources.NewProperty&lt;/a&gt;&lt;/li&gt;
-            &lt;/ul&gt;
-        &lt;/div&gt;
+&lt;div class="well sidebar-nav"&gt;
+	&lt;li class="nav-header"&gt;Property list:&lt;/li&gt;
+	&lt;ul class="nav nav-list" data-bind="foreach:assets"&gt;
+		&lt;li&gt;&lt;a data-bind="text:name,click:select" href="#"&gt;&lt;/a&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+	&lt;ul class="nav nav-list"&gt;
+		&lt;li class="nav-header"&gt;Actions:&lt;/li&gt;
+		&lt;li&gt;&lt;a href="#" data-bind="click: newAsset"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;@BasicResources.NewProperty&lt;/a&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/div&gt;
 	</pre>
 	<p><b>Foreach binding</b> was used in order to render all the appartments. For each appartment an anchor tag is emitted. The text of this tag is bound to the name of the appartment and the click actions is bound to the <i>select</i> function. The creation of new asset is handled by the <i>newAsset</i> function of the <i>OwnerViewModel</i>.</p>
 	<p>The second part of the menu is defined directly as html. Three anchor tags are render, each of them pointing to different tab, using the same url pattern. For example the URL "#/{property-name}/overview" should show the "Overview" tab of the property with given name. Client side routing is used, in order to execute certain actions depending on the accessed url. In order to enable client side rendering <b>Path.JS</b> library is used. The <b>attribute binding of knockout</b> is used to render the correct anchor tag.</p>
 	<pre>
-		&lt;div class="well sidebar-nav" data-bind="with:selectedAsset"&gt;
-			&lt;ul class="nav nav-list"&gt;
-				&lt;li class="nav-header" data-bind="text:name"&gt;&lt;/li&gt;
-				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/overview'}"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;Overview&lt;/a&gt;&lt;/li&gt;
-				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/charges'}"&gt;&lt;i class="icon-arrow-down"&gt;&lt;/i&gt;Charges&lt;/a&gt;&lt;/li&gt;
-				&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/rents'}"&gt;&lt;i class="icon-arrow-up"&gt;&lt;/i&gt;Rents&lt;/a&gt;&lt;/li&gt;
-			&lt;/ul&gt;
-		&lt;/div&gt;
+&lt;div class="well sidebar-nav" data-bind="with:selectedAsset"&gt;
+	&lt;ul class="nav nav-list"&gt;
+		&lt;li class="nav-header" data-bind="text:name"&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/overview'}"&gt;&lt;i class="icon-pencil"&gt;&lt;/i&gt;Overview&lt;/a&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/charges'}"&gt;&lt;i class="icon-arrow-down"&gt;&lt;/i&gt;Charges&lt;/a&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;a data-bind="attr: {href: '#/' + name() + '/rents'}"&gt;&lt;i class="icon-arrow-up"&gt;&lt;/i&gt;Rents&lt;/a&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/div&gt;
 	</pre>
 	<p>You can also notice, that the <b>with binding</b> was used to set the current asset view model as the parent for the navigation div.</p>
 	<p>The right part simply contains all of the 3 tabs (overview, charges or rents), only one of them visible at time. In order to separate the content into multiple files, partial rendering of ASP.MVC is used.<p>
 	<pre>
-		&lt;div id="assetDetail" class="span9" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}"&gt;
-			&lt;div id="overview"&gt;
-				@Html.Partial("Overview")
-			&lt;/div&gt;
-			&lt;div id="charges"&gt;
-				@Html.Partial("Charges")
-			&lt;/div&gt;
-			&lt;div id="rents"&gt;
-				@Html.Partial("Rents")
-			&lt;/div&gt;
-		&lt;/div&gt;
+&lt;div id="assetDetail" class="span9" data-bind="template: {data: selectedAsset, if:selectedAsset, afterRender: detailsRendered}"&gt;
+	&lt;div id="overview"&gt;
+		@Html.Partial("Overview")
+	&lt;/div&gt;
+	&lt;div id="charges"&gt;
+		@Html.Partial("Charges")
+	&lt;/div&gt;
+	&lt;div id="rents"&gt;
+		@Html.Partial("Rents")
+	&lt;/div&gt;
+&lt;/div&gt;
 	</pre>
 	<p>Again the <b>with binding</b> is used as the selected appartment's ViewModel is used to back-up this part of the view.</p>
 	<p>Now let's go back to the ViewModels. <b>ChargeViewModel</b> and <b>RentViewModel</b> have a same ancestor which is called <b>ObligationViewModel</b>. Since both rents and charges how some common properties such as the amount or the regularity, a common parent ViewModel is good place to define them.</p>
 	<p>The most interesting part of <i>ChargeViewModel</i> is the <i>save</i> function which uses JQuery to emit a HTTP request to the <i>ChargesController</i>. As previously described, two different operations are exposed with the same url, one for creation (HTTP PUT) another for update (HTTP POST). The ViewModel uses a <i>new</i> flag to distinguish these two cases. Before the request is executed, the ViewModel uses <a href="https://github.com/ericmbarnard/Knockout-Validation">Knockout.Validation</a> plugin to perform this check with the<i>errors</i> property.</p>
 	<pre>
-	self.save = function () {
-        if (self.errors().length != 0) {
-            self.errors().showAllMessages();
-            return;
-        }
+self.save = function () {
+	if (self.errors().length != 0) {
+		self.errors().showAllMessages();
+		return;
+	}
 
-        self.isBusy(true);
-        data = self.toDto();
-        var rUrl = "/../api/charges?assetID=" + self.parent.id();
-        if (self.isNew())
-            var opType = "post";
-        else
-            var opType = "put";
+	self.isBusy(true);
+	data = self.toDto();
+	var rUrl = "/../api/charges?assetID=" + self.parent.id();
+	if (self.isNew())
+		var opType = "post";
+	else
+		var opType = "put";
 
-        $.ajax(rUrl, {
-            data: JSON.stringify(data),
-            type: opType, contentType: "application/json",
-            success: function (result) {
-                self.isBusy(false);
-                self.message(result.message);
-                if (self.isNew()) {
-                    self.update(result.dto);
-                    parent.charges.push(self);
-                }
-            }
-        });
-    }
+	$.ajax(rUrl, {
+		data: JSON.stringify(data),
+		type: opType, contentType: "application/json",
+		success: function (result) {
+			self.isBusy(false);
+			self.message(result.message);
+			if (self.isNew()) {
+				self.update(result.dto);
+				parent.charges.push(self);
+			}
+		}
+	});
+}
 	</pre>
 	<p>When there are no validation errors, the object which will be send to the server is created from the ViewModel by the <i>toDto</i> method. It does not make sense to serialize the whole ViewModel and send it to the server. In the <i>toDto</i> method the ViewModel is converted to an JS object which can be directly mapped to the server side entity. The <i>ajax</i> method of jQuery is called, which creates new HTTP request. When the response from the server comes back, the callback is executed, which performs several operations. Besides updating the GUI-helpful variables the callback performs two different operations. If the new charge was added, then it has to be added also to the parent ViewModel(appartment - represented by <i>AssetViewModel</i>). The new charge also recieved the server side ID which has to be updated. All other properties are already up-to-date.
 	</p>
 	<h3>Removing charge</h3>
 	<p>The removing operations is very simple. Only asset and charge ids have to be supplied to the controller. If the operations has succeed, then againg the collection of charges  inside <i>AssetViewModel</i> has to be updated.</p>
 	<pre>
-	self.remove = function () {
-        $.ajax("/../api/charges/" + self.id() + "?assetID=" + self.parent.id(), {
-            type: "delete", contentType: "application/json",
-            success: function (result) {
-                self.isBusy(false);
-                parent.charges.remove(self);
-                parent.selectedCharge(null);
-            }
-        });
-    };
+self.remove = function () {
+	$.ajax("/../api/charges/" + self.id() + "?assetID=" + self.parent.id(), {
+		type: "delete", contentType: "application/json",
+		success: function (result) {
+			self.isBusy(false);
+			parent.charges.remove(self);
+			parent.selectedCharge(null);
+		}
+	});
+};
 	</pre>
 	<h3>Charges View</h3>
 	<p>The charges view is quite classical master detail view. A table of charges is rendered using the foreach binding and then the currently selected charge is rendered in a side div tag using the with binding.</p>
 	<pre>
-	 &lt;div class="row-fluid"&gt;
-		&lt;table class="table table-bordered table-condensed"&gt;
-			&lt;tbody data-bind="foreach: charges"&gt;
-				&lt;tr style="cursor: pointer;" data-bind="click: select"&gt;
-					&lt;td style="vertical-align: middle"&gt;
-						&lt;div data-bind='text: name'&gt;&lt;/div&gt;
-					&lt;/td&gt;
-					&lt;td style="vertical-align: middle"&gt;
-						&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
-					&lt;/td&gt;
-					&lt;td style="vertical-align: middle"&gt;
-						&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
-					&lt;/td&gt;
-					&lt;td&gt;
-						&lt;button type="submit" class="btn" data-bind="visibility: !isNew(), click:remove"&gt;&lt;i class="icon-trash"&gt;&lt;/i&gt;&lt;/button&gt;
-					&lt;/td&gt;
-				&lt;/tr&gt;
-			&lt;/tbody&gt;
-		&lt;/table&gt;
-	&lt;/div&gt;
+ &lt;div class="row-fluid"&gt;
+	&lt;table class="table table-bordered table-condensed"&gt;
+		&lt;tbody data-bind="foreach: charges"&gt;
+			&lt;tr style="cursor: pointer;" data-bind="click: select"&gt;
+				&lt;td style="vertical-align: middle"&gt;
+					&lt;div data-bind='text: name'&gt;&lt;/div&gt;
+				&lt;/td&gt;
+				&lt;td style="vertical-align: middle"&gt;
+					&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
+				&lt;/td&gt;
+				&lt;td style="vertical-align: middle"&gt;
+					&lt;div data-bind="text: amount"&gt;&lt;/div&gt;
+				&lt;/td&gt;
+				&lt;td&gt;
+					&lt;button type="submit" class="btn" data-bind="visibility: !isNew(), click:remove"&gt;&lt;i class="icon-trash"&gt;&lt;/i&gt;&lt;/button&gt;
+				&lt;/td&gt;
+			&lt;/tr&gt;
+		&lt;/tbody&gt;
+	&lt;/table&gt;
+&lt;/div&gt;
 	</pre>
 	<p>You can see, that the click action of the table row is bound the the <i>select</i> method of the <i>ChargeViewModel</i></p>
 	<h3>Using the KoExtensions</h3>
 	<p>As you can see there is a pie chart representing the charges repartition. This chart is rendered using D3JS, more specifically by a special binding of a small project of mine called KoExtensions. The rendering of the graph is really simple. The only thing to do is to use the <i>piechart</i> binding which is part of KoExtensions. This binding takes 3 parameters: the collection of the data to be rendered, transformation function to indicate which values inside the collection should be used to render the graph and the last but not least the initialization parameters.</p>
 	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/pie_chart.PNG"/>
 	<pre>
-	&lt;div data-bind="piechart: charges, transformation:obligationToChart"&gt;&lt;/div&gt;
-	function obligationToChart(d) {
-		return { x: d.name(), y: d.amount() };
-	}
+&lt;div data-bind="piechart: charges, transformation:obligationToChart"&gt;&lt;/div&gt;
+function obligationToChart(d) {
+	return { x: d.name(), y: d.amount() };
+}
 	</pre>
 	<p>In order to render the graph, the KoExtensions binding needs to know which value in one concretion collection item specifies the with of each arc in the pie chart and which value is the title. Internally these values are simply <i>x</i> and <i>y</i>. The transformation function uses the <i>name</i> and the <i>amount</i> values of the charge. The initialization parameters of the chart are not set, so the default once are used.</p>
 	<h3>Bootstrap style date-time picker</h3>
 	<p>Bootstrap does not contain a date-time picker nor is it on their roadmap. Luckily the community came up with a solution. I have used the one called <a href="http://www.eyecon.ro/bootstrap-datepicker/">bootstrap-datepicker.js</a>. Since I needed to use it with Knockout, I have came up with another special binding which you can find in KoExtensions, it's usage is fairly simple.</p>
 	<pre>
-	&lt;div class="controls"&gt;
-		&lt;input type="text" data-bind="datepicker:end"&gt;
-	&lt;/div&gt;
+&lt;div class="controls"&gt;
+	&lt;input type="text" data-bind="datepicker:end"&gt;
+&lt;/div&gt;
 	</pre>
 	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/datepicker.PNG"/>
 	<h3>Binding to the map</h3>
 	<p>The last usage of KoExtensions is the rendering of the map containing all the assets in the left hand bar. I have created a binding which enables the rendering of one or more ViewModels on the map, by specifing which property contains the latitude and longitude values. Here the binding is used withing an foreach binding, in order to display all the appartments in the map.</i>
 	<pre>
-	&lt;div class="row-fluid"&gt;
-		&lt;div data-bind="foreach: assets"&gt;
-			&lt;div data-bind="latitude: lat, longitude:lng, map:map, selected:selected"&gt;
-			&lt;/div&gt;
-		&lt;/div&gt;
-		&lt;div id="map" style="width: 100%; height: 300px"&gt;
+&lt;div class="row-fluid"&gt;
+	&lt;div data-bind="foreach: assets"&gt;
+		&lt;div data-bind="latitude: lat, longitude:lng, map:map, selected:selected"&gt;
 		&lt;/div&gt;
 	&lt;/div&gt;
+	&lt;div id="map" style="width: 100%; height: 300px"&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
 	</pre>
 	<p>The map has to be initialized the usual way as described in the official google maps tutorial, the binding does not take care of this. This enables the developer to define the map exactly the way he likes. Any other elements can be rendered on the same map, simply by passing the same map object to other bindings. The selected property which is passed in the binding tells the binding which variable it should update or which function to call when one element is selected in the map.</p>
 	<h3>Knockout Validation and Bootstrap styles</h3>
@@ -335,23 +336,23 @@
 	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/charges_table.PNG"/>
 	<p>Bootstrap provides styles for highlighting UI components. <a href="">Knockout-Validation</a> is a great plugin which extends any observable value with <i>isValid</i> property, and enables the developer to define rules which will determine the value of this property.</p>
 	<pre>
-	self.amount = ko.observable().extend({ required: true, number: true });
-	self.name = ko.observable().extend({ required: true });
-	
-	&lt;div class="control-group" data-bind="css : {error:!name.isValid()}"&gt;
-		&lt;label class="control-label"&gt;Name&lt;/label&gt;
-		&lt;div class="controls"&gt;
-			&lt;input type="text" placeholder="@BasicResources.Name" data-bind="value:name"&gt;
-			&lt;span class="help-inline" data-bind="validationMessage: name"&gt;&lt;/span&gt;
-		&lt;/div&gt;
+self.amount = ko.observable().extend({ required: true, number: true });
+self.name = ko.observable().extend({ required: true });
+
+&lt;div class="control-group" data-bind="css : {error:!name.isValid()}"&gt;
+	&lt;label class="control-label"&gt;Name&lt;/label&gt;
+	&lt;div class="controls"&gt;
+		&lt;input type="text" placeholder="@BasicResources.Name" data-bind="value:name"&gt;
+		&lt;span class="help-inline" data-bind="validationMessage: name"&gt;&lt;/span&gt;
 	&lt;/div&gt;
-	&lt;div class="control-group" data-bind="css : {error:!amount.isValid()}"&gt;
-		&lt;label class="control-label"&gt;@BasicResources.Amount&lt;/label&gt;
-		&lt;div class="controls"&gt;
-			&lt;input type="text" placeholder="@BasicResources.Amount" data-bind="value: amount"&gt;
-			&lt;span class="help-inline" data-bind="validationMessage: amount"&gt;&lt;/span&gt;
-		&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="control-group" data-bind="css : {error:!amount.isValid()}"&gt;
+	&lt;label class="control-label"&gt;@BasicResources.Amount&lt;/label&gt;
+	&lt;div class="controls"&gt;
+		&lt;input type="text" placeholder="@BasicResources.Amount" data-bind="value: amount"&gt;
+		&lt;span class="help-inline" data-bind="validationMessage: amount"&gt;&lt;/span&gt;
 	&lt;/div&gt;
+&lt;/div&gt;
 	</pre>
 	<img src="https://raw.github.com/hoonzis/CPKnockoutRavenDB/master/img/validation.PNG"></img>
 	<p>By combining these Bootstrap with Knockout-Validation, we can achieve a very nice effect of highlighting when the value is invalid</p>
